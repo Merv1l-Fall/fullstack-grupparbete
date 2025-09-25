@@ -1,0 +1,35 @@
+{
+  "name": "fullstack-grupparbete",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-server": "tsc",
+    "start-server": "node --env-file .env ./serverDist/server.js",
+    "restart": "clear && npm run build-server && npm run start-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Merv1l-Fall/fullstack-grupparbete.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Merv1l-Fall/fullstack-grupparbete/issues"
+  },
+  "homepage": "https://github.com/Merv1l-Fall/fullstack-grupparbete#readme",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.896.0",
+    "@aws-sdk/lib-dynamodb": "^3.896.0",
+    "express": "^5.1.0",
+    "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.5.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.2"
+  }
+}
