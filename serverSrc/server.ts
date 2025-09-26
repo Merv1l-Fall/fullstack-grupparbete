@@ -2,7 +2,8 @@ import express from 'express'
 import type { Express, Request, RequestHandler, Response } from 'express'
 
 
-const port: number = Number(process.env.PORT)
+const port: number = Number(process.env.PORT) || 3350
+
 const app: Express = express()
 
 
