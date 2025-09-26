@@ -17,5 +17,4 @@ const client: DynamoDBClient = new DynamoDBClient({
 });
 
 const db: DynamoDBDocumentClient = DynamoDBDocumentClient.from(client);
-
-export default {db}
+export { db }
