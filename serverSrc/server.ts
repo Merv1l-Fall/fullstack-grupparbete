@@ -1,30 +1,25 @@
-import express from 'express'
-import type { Express, Request, RequestHandler, Response } from 'express'
+// src/server.ts
+import express from "express";
+import type { Express, RequestHandler } from "express";
 
+import productsRouter from "./routes/products.js";
 
-const port: number = Number(process.env.PORT)
-const app: Express = express()
-
+const port: number = Number(process.env.PORT) || 3350;
+const app: Express = express();
 
 // Middleware
 const logger: RequestHandler = (req, res, next) => {
-	console.log(`${req.method}  ${req.url}`)
-	next()
-}
-app.use('/', logger)
-app.use('/', express.json())
+  console.log(`${req.method} ${req.url}`);
+  next();
+};
 
-// Resurser (routermoduler med endpoints)
+app.use(logger);
+app.use(express.json());
 
-
-
-// Endpoints
+app.use("/api/products", productsRouter);
 
 
-
-
-
-// Starta servern
+// Start server
 app.listen(port, () => {
-	console.log('Server listening on port ' + port)
-})
+  console.log("Server listening on port " + port);
+});
