@@ -10,5 +10,5 @@ const client = new DynamoDBClient({
     },
 });
 const db = DynamoDBDocumentClient.from(client);
-export default { db };
+export { db };
 //# sourceMappingURL=dynamoDb.js.map
