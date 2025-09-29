@@ -6,8 +6,8 @@
 	"type": "module",
 	"scripts": {
 		"build-server": "tsc",
-		"start-server": "node --env-file .env ./serverDist/server.js",
-		"restart": "clear && npm run build-server && npm run start-server"
+		"start-server": "node --env-file .env ./dist/server.js",
+		"restart": "npm run build-server && npm run start-server"
 	},
 	"repository": {
 		"type": "git",

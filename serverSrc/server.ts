@@ -1,5 +1,6 @@
 import express from 'express'
 import type { Express, Request, RequestHandler, Response } from 'express'
+import userRouter from './routes/users.js'
 
 
 const port: number = Number(process.env.PORT)
@@ -15,6 +16,7 @@ app.use('/', logger)
 app.use('/', express.json())
 
 // Resurser (routermoduler med endpoints)
+app.use('/user', userRouter)
 
 
 
