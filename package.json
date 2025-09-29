@@ -5,11 +5,10 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
-  "start-server": "node --env-file .env ./dist/server.js",
-  "build-server": "tsc",
-  "restart": "clear && npm run build-server && npm run start-server"
-},
-
+		"start-server": "node --env-file .env ./dist/server.js",
+		"build-server": "tsc",
+		"restart": "clear && npm run build-server && npm run start-server"
+	},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/Merv1l-Fall/fullstack-grupparbete.git"
