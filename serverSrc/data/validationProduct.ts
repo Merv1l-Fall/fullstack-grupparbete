@@ -1,6 +1,6 @@
-import * as z from "zod";
-import type { Products } from "./types.js";
 
+// src/data/validationProduct.ts
+import { z } from "zod";
 
 //const productsIdRegex = /^p[0-9]+$/
 //const userIdRegex = /^u[0-9]+$/
@@ -15,4 +15,5 @@ const ProductSchema = z.object({
     amountInStock: z.number().int({ message: "Amount måste vara ett heltal" }).min(0, { message: "Amount måste vara noll eller högre" }),
 });
 
-export {ProductSchema};
+export type ProductInput = z.infer<typeof ProductSchema>;
+
