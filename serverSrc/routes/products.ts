@@ -67,21 +67,33 @@ router.put(
       }
 
       const existingProduct = getRes.Item;
+      console.log("PUT body received:", req.body);
+
 
       // Validera bodyn
-      let parsedData: ProductInput;
-      try {
-        parsedData = ProductSchema.parse(req.body);
-      } catch (err: any) {
-        const issues = err.errors?.map((e: any) => ({
-          path: e.path.join('.'),
-          message: e.message
-        })) ?? [];
+      // let parsedData: ProductInput;
+      // try {
+      //   parsedData = ProductSchema.parse(req.body);
+      // } catch (err: any) {
+      //   const issues = err.errors?.map((e: any) => ({
+      //     path: e.path.join('.'),
+      //     message: e.message
+      //   })) ?? [];
+      //   return res.status(400).json({ error: "Valideringsfel", issues });
+      // }
+      const validation = ProductSchema.safeParse(req.body);
+      if (!validation.success) {
+        const issues = validation.error.issues.map(e => ({
+          path: e.path.join('.') || '(root)',
+          message: e.message,
+        }));
+        console.warn('Valideringsfel:', issues);
         return res.status(400).json({ error: "Valideringsfel", issues });
       }
+      const parsedData = validation.data;
 
       // Kontrollera att id matchar URL
-      if (parsedData.id !== productId) {
+      if (parsedData.id !== `PRODUCT#${productId}`) {
         return res.status(400).json({ error: "Produkt ID i URL och body måste vara samma" });
       }
 
@@ -91,9 +103,9 @@ router.put(
         PK: `PRODUCT#${productId}`,
         SK: "METADATA",
         productId,
-        name: parsedData.name,
+        name: parsedData.productName,
         price: parsedData.price,
-        url: parsedData.imageUrl,
+        // url: parsedData.imageUrl,
         amountInStock: parsedData.amountInStock,
         createdAt: existingProduct.createdAt ?? now,
         updatedAt: now,
@@ -110,7 +122,7 @@ router.put(
       const newComparable = {
         name: itemToSave.name,
         price: itemToSave.price,
-        url: itemToSave.url ?? null,
+        // url: itemToSave.url ?? null,
         amountInStock: itemToSave.amountInStock ?? 0
       };
 
