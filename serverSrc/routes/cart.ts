@@ -3,8 +3,8 @@
 import type { Request, Response } from "express";
 import {Router} from "express"
 import express from 'express';
-import fs from "fs"; //-> TODO
-import path from "path"; //-> TODO
+import fs from "fs"; //-> Node modul för att hantera filsystemet, vi använder den för att läsa, skriva och se om filen finns innan läsning
+import path from "path"; //-> Node modul för filsystemets sökvägar (path)
 import { cartItemSchema, cartsSchema } from "../data/validationCart.js"
 import { v4 as uuidv4 } from "uuid"; //För unika id:n -> skapar unika id så vi slipper skriva en funktion fört
 
