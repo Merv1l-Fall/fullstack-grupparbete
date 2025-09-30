@@ -5,8 +5,8 @@
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
+		"start-server": "node --env-file .env ./dist/server.js",
 		"build-server": "tsc",
-		"start-server": "node --env-file .env ./serverDist/server.js",
 		"restart": "clear && npm run build-server && npm run start-server"
 	},
 	"repository": {
