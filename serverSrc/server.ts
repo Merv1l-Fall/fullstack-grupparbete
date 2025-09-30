@@ -18,7 +18,7 @@ app.use(logger);
 app.use(express.json());
 
 app.use("/api/products", productsRouter);
-app.use("/user", userRouter);
+app.use("/users", userRouter);
 
 
 // Start server
