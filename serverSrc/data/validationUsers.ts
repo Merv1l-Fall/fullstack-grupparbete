@@ -10,17 +10,13 @@ const UserSchema = z.object({
 });
 
 const UserArraySchema = z.array(UserSchema);
-
-function isUser(item: unknown): item is User {
-	try {
-		UserSchema.parse(item);
-		return true;
-	} catch (e) {
-		return false;
-	}
-}
+const UserNameSchema = z.object({
+	userName: z.string().min(1, { message: "Användaren måste ha ett namn" }),
+});
 
 
-export {UserSchema, UserArraySchema, isUser};
+
+
+export {UserSchema, UserArraySchema, UserNameSchema};
 
 

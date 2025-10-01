@@ -5,9 +5,9 @@ import type { Request, Response } from "express";
 import type { User } from "../data/types.js";
 import { cryptoId } from "../utils/idGenerator.js";
 import {
-	isUser,
 	UserSchema,
 	UserArraySchema,
+	UserNameSchema,
 } from "../data/validationUsers.js";
 import {
 	QueryCommand,
@@ -27,6 +27,9 @@ const tableName: string = "fullstack_grupparbete";
 // Local types
 type UserIdParam = {
 	id: string;
+};
+type CreateUserBody = {
+	userName: string;
 };
 
 //GET:id api/user/:id - Hämta en användare med id
@@ -49,19 +52,20 @@ router.get(
 
 			const result: GetCommandOutput = await db.send(getCommand);
 
-			const item = result.Item;
-			if (!item) {
-				res.status(404).json({ message: "Användare hittades inte" });
+			if (!result.Item) {
+				res.status(404).send({ message: "Användare hittades inte" });
 				return;
 			}
 
-			if (!isUser(item)) {
-				console.error("Data matchar inte user");
-				res.sendStatus(500);
-				return;
+			const parsed = UserSchema.safeParse(result.Item);
+			if (!parsed.success) {
+				console.error("Valideringsfel:", parsed.error);
+				return res
+					.status(400)
+					.send({ message: "Data matchar inte user" });
 			}
 
-			return res.status(200).json(item);
+			return res.status(200).json(parsed.data);
 		} catch (error) {
 			console.error("Fel vid hämtning av användare:", error);
 			res.status(500).json({ message: "Internt serverfel" });
@@ -70,7 +74,7 @@ router.get(
 );
 
 //GET api/user - Hämta alla användare
-router.get("/", async (req, res: Response<User[]>) => {
+router.get("/", async (req, res: Response<User[] | { message: string }>) => {
 	const result: ScanCommandOutput = await db.send(
 		new ScanCommand({
 			TableName: tableName,
@@ -86,7 +90,7 @@ router.get("/", async (req, res: Response<User[]>) => {
 		return;
 	}
 
-	// Validera items med zod eller egen schema
+	// Validera items med zod
 	const parseResult = UserArraySchema.safeParse(result.Items);
 	if (!parseResult.success) {
 		console.error(
@@ -94,7 +98,7 @@ router.get("/", async (req, res: Response<User[]>) => {
 			result.Items,
 			parseResult.error
 		);
-		res.sendStatus(500);
+		res.status(400).send({ message: "Ogiltig användardata från databasen" });
 		return;
 	}
 
@@ -105,17 +109,33 @@ router.get("/", async (req, res: Response<User[]>) => {
 //POST api/user - Skapa en användare
 
 router.post("/", async (req, res: Response<{ message: string }>) => {
-	const userData: User = req.body;
+	const userData: CreateUserBody = req.body;
 	// Validera inkommande data
-	const parseResult = UserSchema.safeParse(userData);
+	const parseResult = UserNameSchema.safeParse(userData);
 	if (!parseResult.success) {
-		res.status(400).json({ message: "Ogiltig användardata" });
+		res.status(400).send({ message: "Ogiltig användardata" });
 		return;
 	}
-	const newUser: User = parseResult.data;
-	newUser.PK = `USER#${cryptoId()}`;
-	newUser.SK = "PROFILE";
-	
-
+	//slumpa ett Id till användaren och skapa objektet
+	const pk = `USER#${cryptoId()}`;
+	const newUser: User = {
+		PK: pk,
+		SK: "PROFILE",
+		userId: pk,
+		userName: parseResult.data.userName,
+	}
+	//spara i db
+	try {
+		const putCommand = new PutCommand({
+			TableName: tableName,
+			Item: newUser,
+			ConditionExpression: "attribute_not_exists(PK)", // Förhindra överskrivning
+		});
+		await db.send(putCommand);
+		res.status(201).send({ message: "Användare skapad" });
+	} catch (error) {
+		console.error("Fel vid skapande av användare:", error);
+		res.status(500).send({ message: "Internt serverfel" });
+	}
 });
 export default router;
