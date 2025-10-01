@@ -25,6 +25,7 @@
 		"@aws-sdk/lib-dynamodb": "^3.896.0",
 		"cors": "^2.8.5",
 		"express": "^5.1.0",
+		"uuid": "^13.0.0",
 		"zod": "^4.1.11"
 	},
 	"devDependencies": {
