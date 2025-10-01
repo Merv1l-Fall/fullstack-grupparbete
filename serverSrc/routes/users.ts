@@ -98,7 +98,9 @@ router.get("/", async (req, res: Response<User[] | { message: string }>) => {
 			result.Items,
 			parseResult.error
 		);
-		res.status(400).send({ message: "Ogiltig användardata från databasen" });
+		res.status(400).send({
+			message: "Ogiltig användardata från databasen",
+		});
 		return;
 	}
 
@@ -117,13 +119,13 @@ router.post("/", async (req, res: Response<{ message: string }>) => {
 		return;
 	}
 	//slumpa ett Id till användaren och skapa objektet
-	const pk = `USER#${cryptoId()}`;
+	const pk: string = `USER#${cryptoId()}`;
 	const newUser: User = {
 		PK: pk,
 		SK: "PROFILE",
 		userId: pk,
 		userName: parseResult.data.userName,
-	}
+	};
 	//spara i db
 	try {
 		const putCommand = new PutCommand({
@@ -138,4 +140,67 @@ router.post("/", async (req, res: Response<{ message: string }>) => {
 		res.status(500).send({ message: "Internt serverfel" });
 	}
 });
+
+// PUT api/user/:id - Uppdatera en användare
+router.put(
+	"/:id",
+	async (req: Request<UserIdParam>, res: Response<{ message: string }>) => {
+		const userId: string = `USER#${req.params.id}`;
+		const userData: CreateUserBody = req.body;
+		// Validera inkommande data
+		const parseResult = UserNameSchema.safeParse(userData);
+		if (!parseResult.success) {
+			res.status(400).send({ message: "Ogiltig användardata" });
+			return;
+		}
+		try {
+			const updateCommand = new UpdateCommand({
+				TableName: tableName,
+				Key: {
+					PK: userId,
+					SK: "PROFILE",
+				},
+				UpdateExpression: "SET userName = :userName",
+				ExpressionAttributeValues: {
+					":userName": parseResult.data.userName,
+				},
+				ConditionExpression: "attribute_exists(PK)", // Säkerställ att användaren finns
+			});
+			await db.send(updateCommand);
+			res.status(200).send({ message: "Användare uppdaterad" });
+		} catch (error) {
+			console.error("Fel vid uppdatering av användare:", error);
+			res.status(500).send({ message: "Internt serverfel" });
+		}
+	}
+);
+
+// DELETE api/user/:id - Radera en användare
+router.delete(
+	"/:id",
+	async (req: Request<UserIdParam>, res: Response<{ message: string }>) => {
+		const userId: string = `USER#${req.params.id}`;
+		try {
+			const deleteCommand = new DeleteCommand({
+				TableName: tableName,
+				Key: {
+					PK: userId,
+					SK: "PROFILE",
+				},
+				ConditionExpression: "attribute_exists(PK)", // Säkerställ att användaren finns
+			});
+			await db.send(deleteCommand);
+			res.status(200).send({ message: "Användare raderad" });
+		} catch (error: any) {
+
+			if (error.name === "ConditionalCheckFailedException") {
+				res.status(404).send({ message: "Användare hittades inte" });
+				return;
+			}
+			console.error("Fel vid radering av användare:", error);
+			res.status(500).send({ message: "Internt serverfel" });
+		}
+	}
+);
+
 export default router;
