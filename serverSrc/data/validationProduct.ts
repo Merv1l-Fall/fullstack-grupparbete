@@ -3,12 +3,14 @@
 // src/data/validationProduct.ts
 import { z } from "zod";
 
+
+
 //const productsIdRegex = /^p[0-9]+$/
 //const userIdRegex = /^u[0-9]+$/
 //const cartIdRegex = /^[0-9]+$/
 
 
-const ProductSchema = z.object({
+ export const ProductSchema = z.object({
     id: z.string().min(1, { message: "Produkten måste ha ett ID" }),
     name: z.string().min(1, { message: "Produkten måste ha ett namn" }),
     price: z.number().min(0, { message: "Priset måste ha ett nummer som är noll eller högre" }),

@@ -2,6 +2,8 @@
 import express, { Router } from "express";
 import type { Request, Response } from "express";
 import { GetCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { ProductSchema } from "../data/validationProduct.js";
 import { db } from "../data/dynamoDb.js";
 
 const router: Router = express.Router();
@@ -46,7 +48,43 @@ router.get('/', async (req: Request, res: Response) => {
         console.error("Error fetching all products:", error);
         res.status(500).json({ message: "could not fetch products", error: String(error) });
     }
+});  
+
+// Create a new product
+router.post("/", async (req: Request, res: Response) => {
+  try {
+    // validate input with Zod
+    const parsed = ProductSchema.parse(req.body);
+
+    const item = {
+      PK: `PRODUCT#${parsed.id}`,
+      SK: "METADATA",
+      ...parsed,
+    };
+
+    const command = new PutCommand({
+      TableName: "fullstack_grupparbete",
+      Item: item,
+      ConditionExpression: "attribute_not_exists(PK)", //prevent duplicate
+    });
+
+    await db.send(command);
+
+    res.status(201).json({ message: "Product created", product: item });//if succeed
+  } catch (err: any) {
+    if (err.name === "ConditionalCheckFailedException") {
+      return res.status(400).json({ error: "Product with this ID already exists" });//if duplicated
+    }
+    if (err.errors) {
+      // Zod validation errors
+      return res.status(400).json({ error: err.errors });
+    }
+    console.error("Error creating product:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
+
+
 export default router;
 
 
