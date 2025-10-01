@@ -2,9 +2,7 @@
 import express, { Router } from "express";
 import type { Request, Response } from "express";
 import { GetCommand, ScanCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
-import { ProductSchema } from "../data/validationProduct.js";
 import { db } from "../data/dynamoDb.js";
-
 import { ProductSchema, type ProductInput } from "../data/validationProduct.js";
 
 const router: Router = express.Router();
