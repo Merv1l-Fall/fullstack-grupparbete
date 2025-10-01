@@ -19,5 +19,5 @@ export interface Products {
     name: string;
     price: number;
     imageUrl: string;
-    amountInStock: number;
+    amountInStock: string;
 }
