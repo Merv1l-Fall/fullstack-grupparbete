@@ -1,8 +1,10 @@
 // interface/types för users, cart och products
 
 export interface User { 
-    id: string;
-    name: string;
+    userId: string;
+    userName: string;
+	SK: string;
+	PK: string;
 }
 
 export interface Cart { 
