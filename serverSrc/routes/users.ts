@@ -3,6 +3,7 @@ import { Router } from "express";
 import { db } from "../data/dynamoDb.js";
 import type { Request, Response } from "express";
 import type { User } from "../data/types.js";
+import { cryptoId } from "../utils/idGenerator.js";
 import {
 	isUser,
 	UserSchema,
@@ -18,6 +19,7 @@ import {
 	type ScanCommandOutput,
 	type GetCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
+import { uuid } from "zod";
 
 const router: Router = Router();
 const tableName: string = "fullstack_grupparbete";
@@ -100,4 +102,20 @@ router.get("/", async (req, res: Response<User[]>) => {
 	res.send(users);
 });
 
+//POST api/user - Skapa en användare
+
+router.post("/", async (req, res: Response<{ message: string }>) => {
+	const userData: User = req.body;
+	// Validera inkommande data
+	const parseResult = UserSchema.safeParse(userData);
+	if (!parseResult.success) {
+		res.status(400).json({ message: "Ogiltig användardata" });
+		return;
+	}
+	const newUser: User = parseResult.data;
+	newUser.PK = `USER#${cryptoId()}`;
+	newUser.SK = "PROFILE";
+	
+
+});
 export default router;
