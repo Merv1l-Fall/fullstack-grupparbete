@@ -74,7 +74,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.post("/", async (req: Request<{}, {}, { userId: string }>, res: Response) => {
   const { userId } = req.body;  // Hämtar userId från request-body
 
-  const cartId = "2011";  // Här sätts ett unikt cart-id (kan genereras dynamiskt med uuidv4) Jag vet att vi använder någonting Vilmer skapat, inte hunnit ändra det än bara
+  const cartId = "2011";  // Här sätts ett unikt cart-id TODO: just nu bara ett provisoriskt id
 
   // Skapar ett nytt cart-objekt
   const newCart = {
@@ -147,8 +147,8 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
   const { cartId, userId } = req.params; // Hämtar cartId och userId från URL
 
   try {
-    const PK = `USER#${userId}`;       // Partition key
-    const SK = `CART#${cartId}`;       // Sort key
+    const PK = `USER#${userId}`;       
+    const SK = `CART#${cartId}`;       
 
     await db.send(
       new DeleteCommand({
