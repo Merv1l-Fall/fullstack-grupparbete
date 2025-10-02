@@ -22,10 +22,10 @@ router.get('/:productId', async (req: Request, res: Response) => {
         if (result.Item) {
             res.json(result.Item);
         } else {
-            res.status(404).json({ error: "product not found" });
+            res.status(404).json({ error: "Kan inte hitta produkten" });
         }
     } catch (error) {
-        console.error("Error fetching single product:", error);
+        console.error("Fel vid hämtning av enskild produkt:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -44,8 +44,8 @@ router.get('/', async (req: Request, res: Response) => {
 
         res.json(result.Items || []);
     } catch (error) {
-        console.error("Error fetching all products:", error);
-        res.status(500).json({ message: "could not fetch products", error: String(error) });
+        console.error("Fel vid hämtning av alla produkter", error);
+        res.status(500).json({ message: "Kunde inte hämta produkter", error: String(error) });
     }
 });  
 
@@ -69,16 +69,16 @@ router.post("/", async (req: Request, res: Response) => {
 
     await db.send(command);
 
-    res.status(201).json({ message: "Product created", product: item });//if succeed
+    res.status(201).json({ message: "Produkten har skapats", product: item });//if succeed
   } catch (err: any) {
     if (err.name === "ConditionalCheckFailedException") {
-      return res.status(400).json({ error: "Product with this ID already exists" });//if duplicated
+      return res.status(400).json({ error: "Produkt med detta ID finns redan!" });//if duplicated
     }
     if (err.errors) {
       // Zod validation errors
       return res.status(400).json({ error: err.errors });
     }
-    console.error("Error creating product:", err);
+    console.error("Fel vid skapande av produkt!", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
