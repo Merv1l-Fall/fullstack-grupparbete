@@ -5,7 +5,6 @@ import type { Request, Response } from "express";   // Importerar typer från Ex
 import { Router } from "express";                  // Router för att definiera routes
 import express from "express";                     // Express-framework
 import { cartItemSchema } from "../data/validationCart.js";  // Zod-schema för validering av cart items
-import { v4 as uuidv4 } from "uuid";              // För att generera unika ID:n
 import { db } from "../data/dynamoDb.js";         // DynamoDB-klient
 import { GetCommand, PutCommand, DeleteCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"; // DynamoDB-kommandon
 
@@ -46,7 +45,7 @@ router.get("/", async (req: Request, res: Response<CartItem[] | { message: strin
 
 // GET - Hämta en cart via ID
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", async (req: Request, res: Response) => {
   const { id } = req.params; // Ex: "CART#201"
   const userId = "USER#2";   // Här är användaren hårdkodad (kan göras dynamisk senare)
 
