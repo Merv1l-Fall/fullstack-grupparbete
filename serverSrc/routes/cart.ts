@@ -5,7 +5,8 @@ import express from 'express';
 import fs from "fs"; //-> TODO
 import path from "path"; //-> TODO
 import { cartItemSchema, cartsSchema } from "../data/validationCart.js"
-import { v4 as uuidv4 } from "uuid"; //För unika id:n -> skapar unika id så vi slipper skriva en funktion fört
+// import { v4 as uuidv4 } from "uuid"; //För unika id:n -> skapar unika id så vi slipper skriva en funktion fört
+import { cryptoId } from "../utils/idGenerator.js";
 
 const router = express.Router();
 
@@ -36,7 +37,7 @@ router.get("/", (req: Request, res: Response) => {
 
 router.post("/", (req: Request, res: Response) =>{
   const carts = readCartData();
-  const newCart = {...req.body, id: uuidv4()}; //Skapar unikt nytt ID
+  const newCart = {...req.body, id: cryptoId()}; //Skapar unikt nytt ID
 
   try{
     cartItemSchema.parse(newCart);
