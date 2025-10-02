@@ -1,6 +1,6 @@
 // src/routes/products.ts
 import express, { Router } from "express";
-import { GetCommand, ScanCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, ScanCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { db } from "../data/dynamoDb.js";
 import { ProductSchema } from "../data/validationProduct.js";
 const router = express.Router();
@@ -19,11 +19,11 @@ router.get('/:productId', async (req, res) => {
             res.json(result.Item);
         }
         else {
-            res.status(404).json({ error: "product not found" });
+            res.status(404).json({ error: "Kan inte hitta produkten" });
         }
     }
     catch (error) {
-        console.error("Error fetching single product:", error);
+        console.error("Fel vid hämtning av enskild produkt:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -41,8 +41,8 @@ router.get('/', async (req, res) => {
         res.json(result.Items || []);
     }
     catch (error) {
-        console.error("Error fetching all products:", error);
-        res.status(500).json({ message: "could not fetch products", error: String(error) });
+        console.error("Fel vid hämtning av alla produkter", error);
+        res.status(500).json({ message: "Kunde inte hämta produkter", error: String(error) });
     }
 });
 // Create a new product
@@ -61,17 +61,17 @@ router.post("/", async (req, res) => {
             ConditionExpression: "attribute_not_exists(PK)", //prevent duplicate
         });
         await db.send(command);
-        res.status(201).json({ message: "Product created", product: item }); //if succeed
+        res.status(201).json({ message: "Produkten har skapats", product: item }); //if succeed
     }
     catch (err) {
         if (err.name === "ConditionalCheckFailedException") {
-            return res.status(400).json({ error: "Product with this ID already exists" }); //if duplicated
+            return res.status(400).json({ error: "Produkt med detta ID finns redan!" }); //if duplicated
         }
         if (err.errors) {
             // Zod validation errors
             return res.status(400).json({ error: err.errors });
         }
-        console.error("Error creating product:", err);
+        console.error("Fel vid skapande av produkt!", err);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -153,6 +153,25 @@ router.put('/:productId', async (req, res) => {
     catch (err) {
         console.error("Error med PUT /:productId:", err);
         return res.status(500).json({ error: "Internt serverfel", details: String(err) });
+    }
+});
+// Delete a product by ID
+router.delete('/:productId', async (req, res) => {
+    try {
+        const productId = req.params.productId;
+        const command = new DeleteCommand({
+            TableName: "fullstack_grupparbete",
+            Key: {
+                PK: `PRODUCT#${productId}`,
+                SK: "METADATA"
+            }
+        });
+        await db.send(command);
+        res.status(200).json({ message: "Produkt har tagits bort" });
+    }
+    catch (error) {
+        console.error("Fel vid borttagning av produkt:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
 export default router;

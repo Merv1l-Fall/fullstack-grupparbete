@@ -1,7 +1,7 @@
 // src/routes/products.ts
 import express, { Router } from "express";
 import type { Request, Response } from "express";
-import { GetCommand, ScanCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, ScanCommand, PutCommand,DeleteCommand } from "@aws-sdk/lib-dynamodb";
 import { db } from "../data/dynamoDb.js";
 import { ProductSchema, type ProductInput } from "../data/validationProduct.js";
 
@@ -82,6 +82,8 @@ router.post("/", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
 
 router.put(
   '/:productId',
@@ -178,6 +180,30 @@ router.put(
     }
   }
 );
+// Delete a product by ID
+router.delete('/:productId', async (req: Request, res: Response) => {
+  try {
+    const productId = req.params.productId;
+
+    const command = new DeleteCommand({
+      TableName: "fullstack_grupparbete",
+      Key: {
+        PK: `PRODUCT#${productId}`,
+        SK: "METADATA"
+      }
+    });
+
+    await db.send(command);
+
+    res.status(200).json({ message: "Produkt har tagits bort" });
+  } catch (error) {
+    console.error("Fel vid borttagning av produkt:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
 export default router;
 
 
