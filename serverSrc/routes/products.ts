@@ -1,7 +1,7 @@
 // src/routes/products.ts
 import express, { Router } from "express";
 import type { Request, Response } from "express";
-import { GetCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { db } from "../data/dynamoDb.js";
 import {z} from "zod";
 import { ProductSchema, type ProductInput } from "../data/validationProduct.js";
@@ -148,7 +148,8 @@ router.put('/:id', async (req, res) => {
     console.error(err);
     return res.status(500).send({ error: 'Failed to update product' });
   }
-);
+});
+
 // Delete a product by ID
 router.delete('/:productId', async (req: Request, res: Response) => {
   try {
