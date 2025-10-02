@@ -19,6 +19,7 @@ const logger: RequestHandler = (req, res, next) => {
 app.use(logger);
 app.use( cors())
 app.use(express.json());
+app.use("/", express.static('./static-frontend/'))
 
 app.use("/api/products", productsRouter);
 app.use("/users", userRouter);

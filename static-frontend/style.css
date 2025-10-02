@@ -1,0 +1,13 @@
+body {
+    background-color: beige;
+    margin: 2em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+h1 {
+    color: darkblue;
+}
+p {
+    font-size: 1.2em;
+}
