@@ -2,10 +2,11 @@
 import express from "express";
 import cors from "cors";
 import type { Express, RequestHandler } from "express";
-import cors from "cors"
+
 
 import productsRouter from "./routes/products.js";
 import cartRouter from "./routes/cart.js"
+import userRouter from "./routes/users.js"
 
 const port: number = Number(process.env.PORT) || 3350;
 const app: Express = express();
