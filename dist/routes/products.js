@@ -1,7 +1,8 @@
 // src/routes/products.ts
 import express, { Router } from "express";
-import { GetCommand, ScanCommand, PutCommand, DeleteCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { db } from "../data/dynamoDb.js";
+import { z } from "zod";
 import { ProductSchema } from "../data/validationProduct.js";
 const router = express.Router();
 // Get a single product by ID
@@ -75,84 +76,53 @@ router.post("/", async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
-router.put('/:productId', async (req, res) => {
-    const productId = req.params.productId;
+// PUT 
+const PartialProductSchema = ProductSchema.partial();
+router.put('/:id', async (req, res) => {
     try {
-        // Hämta befintlig produkt
-        const getRes = await db.send(new GetCommand({
+        const parsed = PartialProductSchema.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(400).json({ error: z.treeifyError(parsed.error) });
+        }
+        const updates = parsed.data;
+        if (Object.keys(updates).length === 0) {
+            return res.status(400).send({ error: 'Nothing to update' });
+        }
+        if ('id' in updates) {
+            delete updates.id;
+        }
+        const exprNames = {};
+        const exprValues = {};
+        const sets = [];
+        let i = 0;
+        for (const [k, v] of Object.entries(updates)) {
+            i++;
+            const nameKey = `#k${i}`;
+            const valueKey = `:v${i}`;
+            exprNames[nameKey] = k;
+            exprValues[valueKey] = v;
+            sets.push(`${nameKey} = ${valueKey}`);
+        }
+        const productId = req.params.id;
+        const out = await db.send(new UpdateCommand({
             TableName: "fullstack_grupparbete",
-            Key: { PK: `PRODUCT#${productId}`, SK: "METADATA" }
+            Key: {
+                PK: `PRODUCT#${productId}`,
+                SK: "METADATA"
+            },
+            UpdateExpression: `SET ${sets.join(', ')}`,
+            ExpressionAttributeNames: exprNames,
+            ExpressionAttributeValues: exprValues,
+            ReturnValues: 'ALL_NEW'
         }));
-        if (!getRes.Item) {
-            return res.status(404).json({ error: "Produkten hittas inte!" });
+        if (!out.Attributes) {
+            return res.status(404).send({ error: 'Not found' });
         }
-        const existingProduct = getRes.Item;
-        console.log("PUT body received:", req.body);
-        // Validera bodyn
-        // let parsedData: ProductInput;
-        // try {
-        //   parsedData = ProductSchema.parse(req.body);
-        // } catch (err: any) {
-        //   const issues = err.errors?.map((e: any) => ({
-        //     path: e.path.join('.'),
-        //     message: e.message
-        //   })) ?? [];
-        //   return res.status(400).json({ error: "Valideringsfel", issues });
-        // }
-        const validation = ProductSchema.safeParse(req.body);
-        if (!validation.success) {
-            const issues = validation.error.issues.map(e => ({
-                path: e.path.join('.') || '(root)',
-                message: e.message,
-            }));
-            console.warn('Valideringsfel:', issues);
-            return res.status(400).json({ error: "Valideringsfel", issues });
-        }
-        const parsedData = validation.data;
-        // Kontrollera att id matchar URL
-        if (parsedData.id !== `PRODUCT#${productId}`) {
-            return res.status(400).json({ error: "Produkt ID i URL och body måste vara samma" });
-        }
-        //  Bygg objektet som ska sparas
-        const now = new Date().toISOString();
-        const itemToSave = {
-            PK: `PRODUCT#${productId}`,
-            SK: "METADATA",
-            productId,
-            name: parsedData.productName,
-            price: parsedData.price,
-            // url: parsedData.imageUrl,
-            amountInStock: parsedData.amountInStock,
-            createdAt: existingProduct.createdAt ?? now,
-            updatedAt: now,
-        };
-        // Jämför relevant innehåll för att undvika onödig uppdatering
-        const existComparable = {
-            name: existingProduct.name,
-            price: existingProduct.price,
-            url: existingProduct.url ?? null,
-            amountInStock: existingProduct.amountInStock ?? 0
-        };
-        const newComparable = {
-            name: itemToSave.name,
-            price: itemToSave.price,
-            // url: itemToSave.url ?? null,
-            amountInStock: itemToSave.amountInStock ?? 0
-        };
-        if (JSON.stringify(existComparable) === JSON.stringify(newComparable)) {
-            return res.sendStatus(204);
-        }
-        // Spara med PutCommand
-        await db.send(new PutCommand({
-            TableName: "fullstack_grupparbete",
-            Item: itemToSave
-        }));
-        //  Returnera den uppdaterade produkten
-        return res.status(200).json(itemToSave);
+        return res.json(out.Attributes);
     }
     catch (err) {
-        console.error("Error med PUT /:productId:", err);
-        return res.status(500).json({ error: "Internt serverfel", details: String(err) });
+        console.error(err);
+        return res.status(500).send({ error: 'Failed to update product' });
     }
 });
 // Delete a product by ID

@@ -1,6 +1,8 @@
 export interface User {
-    id: string;
-    name: string;
+    userId: string;
+    userName: string;
+    SK: string;
+    PK: string;
 }
 export interface Cart {
     id: string;
@@ -13,6 +15,6 @@ export interface Products {
     name: string;
     price: number;
     imageUrl: string;
-    amountInStock: number;
+    amountInStock: string;
 }
 //# sourceMappingURL=types.d.ts.map

@@ -7,7 +7,6 @@ export const cartItemSchema = z.object({
     amount: z.number().int().positive("amount måste vara ett positivt heltal"),
 });
 // Här validerar vi hela kundvagnen som en array av cartItemSchema
-// Vi gör det säkert att hela filen bara innehåller giltliga produkter (såsom definerat innan)
 export const cartSchema = z.object({
     id: z.string().nonempty("id krävs"),
     userId: z.string().nonempty("userId krävs"),

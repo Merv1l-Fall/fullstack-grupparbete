@@ -209,5 +209,5 @@ router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
   }
 });
 
-export default router; // Exporterar router för användning i app.ts/server
+export default router; // Exporterar router för användning i server.ts
 
