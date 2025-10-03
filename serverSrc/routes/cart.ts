@@ -7,6 +7,7 @@ import express from "express";                     // Express-framework
 import { cartItemSchema } from "../data/validationCart.js";  // Zod-schema för validering av cart items
 import { db } from "../data/dynamoDb.js";         // DynamoDB-klient
 import { GetCommand, PutCommand, DeleteCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"; // DynamoDB-kommandon
+import { cryptoId } from "../utils/idGenerator.js";
 
 const TABLE_NAME = "fullstack_grupparbete";       // Namnet på DynamoDB-tabellen
 
@@ -23,7 +24,7 @@ const router: Router = express.Router();  // Skapar en router
 
 // GET - Hämta ALLA carts
 
-router.get("/", async (req: Request, res: Response<CartItem[] | { message: string }>) => {
+router.get("/", async (req: Request<{}, {}, {}>, res: Response<CartItem[] | { message: string }>) => {
   try {
     const result = await db.send(
       new ScanCommand({
@@ -45,7 +46,7 @@ router.get("/", async (req: Request, res: Response<CartItem[] | { message: strin
 
 // GET - Hämta en cart via ID
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", async (req: Request<{id:string}>, res: Response) => {
   const { id } = req.params; // Ex: "CART#201"
   const userId = "USER#2";   // Här är användaren hårdkodad (kan göras dynamisk senare)
 
@@ -71,31 +72,30 @@ router.get("/:id", async (req: Request, res: Response) => {
 
 // POST - Skapa en ny cart
 
-router.post("/", async (req: Request<{}, {}, { userId: string }>, res: Response) => {
-  const { userId } = req.body;  // Hämtar userId från request-body
-
-  const cartId = "2011";  // Här sätts ett unikt cart-id TODO: just nu bara ett provisoriskt id
-
-  // Skapar ett nytt cart-objekt
-  const newCart = {
-    PK: `USER#${userId}`,       // Partition key i DynamoDB
-    SK: `CART#${cartId}`,       // Sort key
-    id: `CART#${cartId}`,       // Samma som SK
-    userId: `USER#${userId}`    // Användarens id
-  };
-
+router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) => {
   try {
-    // Validering med Zod
-    cartItemSchema.parse({ id: newCart.id, productId: "9", amount: 1 }); 
+    // Använd userId från request, eller skapa nytt med cryptoId()
+    const userId = req.body.userId || cryptoId(8); 
+    const cartId = cryptoId(8); 
+
+    const newCart = {
+      PK: `USER#${userId}`,   // Partition key
+      SK: `CART#${cartId}`,   // Sort key
+      id: `CART#${cartId}`,   // Cart id
+      userId: `USER#${userId}`
+    };
+
+    // Validering
+    cartItemSchema.parse({ id: newCart.id, productId: "9", amount: 1 });
 
     await db.send(
       new PutCommand({
         TableName: TABLE_NAME,
-        Item: newCart // Skickar cart till DynamoDB
+        Item: newCart
       })
     );
 
-    res.status(201).json(newCart); // Returnerar den skapade cart
+    res.status(201).json(newCart);
   } catch (err: any) {
     console.error("DynamoDB Put error:", err);
     res.status(400).json({ message: err.message || "Fel vid skapande av cart" });
@@ -161,6 +161,51 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
   } catch (err) {
     console.error("DynamoDB Delete error:", err);
     res.status(500).json({ message: "Fel vid borttagning" });
+  }
+});
+
+// DELETE - Rensa bort felaktiga carts (låter USERS och PRODUCTS vara ifred)
+router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
+  try {
+    const result = await db.send(
+      new ScanCommand({
+        TableName: TABLE_NAME,
+      })
+    );
+
+    let deleted: any[] = [];
+
+    for (const item of result.Items || []) {
+      // Vi rensar bara carts → alltså poster där SK börjar med CART#
+      if (typeof item.SK === "string" && item.SK.startsWith("CART#")) {
+        const pkOk = typeof item.PK === "string" && item.PK.startsWith("USER#");
+        const skOk =
+          typeof item.SK === "string" &&
+          item.SK.startsWith("CART#") &&
+          !item.SK.startsWith("CART#CART#"); // inga dubblade CART#
+
+        const userIdOk = item.userId === item.PK; // userId måste matcha PK
+
+        // Om något av villkoren inte stämmer → ta bort cart
+        if (!pkOk || !skOk || !userIdOk) {
+          await db.send(
+            new DeleteCommand({
+              TableName: TABLE_NAME,
+              Key: { PK: item.PK, SK: item.SK }
+            })
+          );
+          deleted.push({ PK: item.PK, SK: item.SK });
+        }
+      }
+    }
+
+    res.status(200).json({
+      message: "Rensning klar endast carts har påverkats",
+      deleted
+    });
+  } catch (err) {
+    console.error("DynamoDB Cleanup error:", err);
+    res.status(500).json({ message: "Fel vid rensning" });
   }
 });
 
