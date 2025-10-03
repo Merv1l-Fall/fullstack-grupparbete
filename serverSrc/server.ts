@@ -1,5 +1,6 @@
 // src/server.ts
 import express from "express";
+import cors from "cors";
 import type { Express, RequestHandler } from "express";
 import cors from "cors"
 
@@ -15,6 +16,7 @@ const logger: RequestHandler = (req, res, next) => {
   next();
 };
 
+
 app.use(logger);
 app.use(cors())
 app.use(express.json());
@@ -22,6 +24,7 @@ app.use(express.json());
 app.use("/api/products", productsRouter);
 
 app.use("/cart", cartRouter)
+app.use("/users", userRouter);
 
 
 // Start server
