@@ -5,11 +5,9 @@ import type { Request, Response } from "express";   // Importerar typer från Ex
 import { Router } from "express";                  // Router för att definiera routes
 import express from "express";                     // Express-framework
 import { cartItemSchema } from "../data/validationCart.js";  // Zod-schema för validering av cart items
-import { db } from "../data/dynamoDb.js";         // DynamoDB-klient
+import { db, tableName } from "../data/dynamoDb.js";         // DynamoDB-klient
 import { GetCommand, PutCommand, DeleteCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"; // DynamoDB-kommandon
-import { cryptoId } from "../utils/idGenerator.js";
-
-const TABLE_NAME = "fullstack_grupparbete";       // Namnet på DynamoDB-tabellen
+import { cryptoId } from "../utils/idGenerator.js";       // Namnet på DynamoDB-tabellen
 
 // Definierar typer för cart items
 export interface CartItem {
@@ -28,7 +26,7 @@ router.get("/", async (req: Request<{}, {}, {}>, res: Response<CartItem[] | { me
   try {
     const result = await db.send(
       new ScanCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         FilterExpression: "begins_with(#sk, :prefix)",  // Filtrera för poster där SK börjar med "CART#"
         ExpressionAttributeNames: { "#sk": "SK" },      // Alias för SK eftersom SK är reserverat ord
         ExpressionAttributeValues: { ":prefix": "CART#" }, // Prefix att jämföra med
@@ -53,7 +51,7 @@ router.get("/:id", async (req: Request<{id:string}>, res: Response) => {
   try {
     const result = await db.send(
       new GetCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { PK: "USER#2", SK: "CART#201" } // Hämtar specifik cart via PK och SK
       })
     );
@@ -90,7 +88,7 @@ router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) =
 
     await db.send(
       new PutCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Item: newCart
       })
     );
@@ -116,7 +114,7 @@ router.put("/:cartId/items/:productId", async (req: Request<{ productId: string 
 
     const result = await db.send(
       new UpdateCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { 
           PK: `USER#${userId}`,   // Partition key för cart
           SK: `ITEM#${productId}` // Sort key för item
@@ -152,7 +150,7 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
 
     await db.send(
       new DeleteCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { PK, SK }, // Tar bort cart från DynamoDB
       })
     );
@@ -169,7 +167,7 @@ router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
   try {
     const result = await db.send(
       new ScanCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
       })
     );
 
@@ -190,7 +188,7 @@ router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
         if (!pkOk || !skOk || !userIdOk) {
           await db.send(
             new DeleteCommand({
-              TableName: TABLE_NAME,
+              TableName: tableName,
               Key: { PK: item.PK, SK: item.SK }
             })
           );

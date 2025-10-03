@@ -2,7 +2,7 @@
 import express, { Router } from "express";
 import type { Request, Response } from "express";
 import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { db } from "../data/dynamoDb.js";
+import { db, tableName } from "../data/dynamoDb.js";
 import {z} from "zod";
 import { ProductSchema, type ProductInput } from "../data/validationProduct.js";
 
@@ -13,7 +13,7 @@ router.get('/:productId', async (req: Request, res: Response) => {
     try {
         const productId = req.params.productId;
         const result = await db.send(new GetCommand({
-            TableName: "fullstack_grupparbete",
+            TableName: tableName,
             Key: {
                 PK: `PRODUCT#${productId}`,
                 SK: "METADATA"
@@ -35,7 +35,7 @@ router.get('/:productId', async (req: Request, res: Response) => {
 router.get('/', async (req: Request, res: Response) => {
     try {
         const result = await db.send(new ScanCommand({
-            TableName: "fullstack_grupparbete",
+            TableName: tableName,
             FilterExpression: "begins_with(PK, :pk)",
             ExpressionAttributeValues: {
                 ":pk": "PRODUCT#",
@@ -63,7 +63,7 @@ router.post("/", async (req: Request, res: Response) => {
     };
 
     const command = new PutCommand({
-      TableName: "fullstack_grupparbete",
+      TableName: tableName,
       Item: item,
       ConditionExpression: "attribute_not_exists(PK)", //prevent duplicate
     });
@@ -128,7 +128,7 @@ router.put('/:id', async (req, res) => {
    
     const productId = req.params.id;
     const out = await db.send(new UpdateCommand({
-      TableName: "fullstack_grupparbete",
+      TableName: tableName,
       Key: {
         PK: `PRODUCT#${productId}`,
         SK: "METADATA"
@@ -156,7 +156,7 @@ router.delete('/:productId', async (req: Request, res: Response) => {
     const productId = req.params.productId;
 
     const command = new DeleteCommand({
-      TableName: "fullstack_grupparbete",
+      TableName: tableName,
       Key: {
         PK: `PRODUCT#${productId}`,
         SK: "METADATA"
