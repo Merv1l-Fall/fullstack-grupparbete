@@ -102,6 +102,8 @@ router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) =
   }
 });
 
+//TODO: POST - lägg till cartItems i en cart!!!
+
 
 // PUT - Uppdatera antal i cart
 
@@ -164,7 +166,7 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
   }
 });
 
-// DELETE - Rensa bort felaktiga carts (låter USERS och PRODUCTS vara ifred)
+// DELETE - Rensa bort felaktiga carts (låter USERS och PRODUCTS vara ifred) -> (SE ÖVER DETTA, verkar ha tagit bort products och carts?)
 router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
   try {
     const result = await db.send(
