@@ -5,6 +5,7 @@ import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } fro
 import { db, tableName } from "../data/dynamoDb.js";
 import {z} from "zod";
 import { ProductSchema, type ProductInput } from "../data/validationProduct.js";
+import { cryptoId } from "../utils/idGenerator.js";
 
 const router: Router = express.Router();
 
@@ -57,7 +58,7 @@ router.post("/", async (req: Request, res: Response) => {
     const parsed = ProductSchema.parse(req.body);
 
     const item = {
-      PK: `PRODUCT#${parsed.id}`,
+      PK: `PRODUCT#${cryptoId()}`,
       SK: "METADATA",
       ...parsed,
     };

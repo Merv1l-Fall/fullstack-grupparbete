@@ -73,7 +73,7 @@ router.get("/:id", async (req: Request<{id:string}>, res: Response) => {
 router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) => {
   try {
     // Använd userId från request, eller skapa nytt med cryptoId()
-    const userId = req.body.userId || cryptoId(8); 
+    const userId = req.body.userId; 
     const cartId = cryptoId(8); 
 
     const newCart = {
@@ -99,6 +99,98 @@ router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) =
     res.status(400).json({ message: err.message || "Fel vid skapande av cart" });
   }
 });
+
+//TODO: POST - Lägg ett item i en cart
+//Exempel body: { "productId": "PRODUCT#2", "amount": 3, "cartId": "2" }
+
+router.post("/:cartId/items", async (req: Request<{ cartId: string }, {}, { productId: string; amount: number; userId: string }>, res: Response) => {
+  const { cartId } = req.params; // Ex: "201"
+  const { productId, amount, userId } = req.body;
+
+  if (!productId || !amount || !userId) {
+    return res.status(400).json({ message: "productId, amount och userId krävs" });
+  }
+
+  try {
+    // Kontrollera att produkten finns i produktlistan
+    const productResult = await db.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          PK: productId,
+          SK: "METADATA"
+        }
+      })
+    );
+
+    if (!productResult.Item) {
+      return res.status(404).json({ message: `Produkt ${productId} hittades inte` });
+    }
+
+    // Kontrollera om produkten redan finns i kundvagnen
+    const existingItem = await db.send(
+      new GetCommand({
+        TableName: TABLE_NAME,
+        Key: {
+          PK: `CART#${cartId}`,
+          SK: `ITEM#${productId}`
+        }
+      })
+    );
+
+    // Om item redan finns, uppdatera MÄNGDEN
+    if (existingItem.Item) {
+      const newAmount = (existingItem.Item.amount || 0) + amount;
+
+      const updateResult = await db.send(
+        new UpdateCommand({
+          TableName: TABLE_NAME,
+          Key: {
+            PK: `CART#${cartId}`,
+            SK: `ITEM#${productId}`
+          },
+          UpdateExpression: "SET amount = :a",
+          ExpressionAttributeValues: {
+            ":a": newAmount
+          },
+          ReturnValues: "ALL_NEW"
+        })
+      );
+
+      return res.status(200).json({
+        message: `Uppdaterade ${productId} till mängd ${newAmount} i cart ${cartId}`,
+        item: updateResult.Attributes
+      });
+    }
+
+    // Om item inte finns, skapa nytt (EXTRA)
+    const newCartItem = {
+      PK: `CART#${cartId}`,
+      SK: `ITEM#${productId}`,
+      cartId: `CART#${cartId}`,
+      productId,
+      amount
+    };
+
+    await db.send(
+      new PutCommand({
+        TableName: TABLE_NAME,
+        Item: newCartItem
+      })
+    );
+
+    res.status(201).json({
+      message: `Produkt ${productId} har lagts till i kundvagn ${cartId}`,
+      item: newCartItem
+    });
+
+  } catch (err) {
+    console.error("DynamoDB Add Item error:", err);
+    res.status(500).json({ message: "Fel vid tillägg av produkt till cart" });
+  }
+});
+
+
 
 
 // PUT - Uppdatera antal i cart
@@ -162,7 +254,7 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
   }
 });
 
-// DELETE - Rensa bort felaktiga carts (låter USERS och PRODUCTS vara ifred)
+// DELETE - Rensa bort felaktiga carts (låter USERS och PRODUCTS vara ifred) -> (SE ÖVER DETTA, verkar ha tagit bort products och carts?)
 router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
   try {
     const result = await db.send(
@@ -207,5 +299,5 @@ router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
   }
 });
 
-export default router; // Exporterar router för användning i app.ts/server
+export default router; // Exporterar router för användning i server.ts
 
