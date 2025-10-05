@@ -9,7 +9,7 @@ export const cartItemSchema = z.object({
 });
 
 // Här validerar vi hela kundvagnen som en array av cartItemSchema
-// Vi gör det säkert att hela filen bara innehåller giltliga produkter (såsom definerat innan)
+
 export const cartSchema = z.object({
   id: z.string().nonempty("id krävs"),
   userId: z.string().nonempty("userId krävs"),
@@ -20,6 +20,6 @@ export const cartSchema = z.object({
 export const cartsSchema = z.array(cartSchema);
 
 // Vi genererar TS-typer automatiskt från schemat
-// CartItem och Cart kan användas i koden för typkontroll
+
 export type Cart = z.infer<typeof cartItemSchema>;
 export type Carts = z.infer<typeof cartsSchema>;

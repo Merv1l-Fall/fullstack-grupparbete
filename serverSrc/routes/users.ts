@@ -1,6 +1,6 @@
 //importer
 import { Router } from "express";
-import { db } from "../data/dynamoDb.js";
+import { db, tableName } from "../data/dynamoDb.js";
 import type { Request, Response } from "express";
 import type { User } from "../data/types.js";
 import { cryptoId } from "../utils/idGenerator.js";
@@ -22,7 +22,6 @@ import {
 import { uuid } from "zod";
 
 const router: Router = Router();
-const tableName: string = "fullstack_grupparbete";
 
 // Local types
 type UserIdParam = {
