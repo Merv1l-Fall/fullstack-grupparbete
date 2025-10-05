@@ -105,7 +105,6 @@ router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) =
 //TODO: POST - Lägg ett item i en cart
 //Exempel body: { "productId": "PRODUCT#2", "amount": 3, "cartId": "2" }
 
-// POST - Lägg till en produkt i en specifik cart (smart version)
 router.post("/:cartId/items", async (req: Request<{ cartId: string }, {}, { productId: string; amount: number; userId: string }>, res: Response) => {
   const { cartId } = req.params; // Ex: "201"
   const { productId, amount, userId } = req.body;
