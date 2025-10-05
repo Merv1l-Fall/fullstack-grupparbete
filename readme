@@ -40,12 +40,12 @@ DELETE /users/:id – Tar bort en användare med angivet ID.
 Om användaren inte finns returneras ett felmeddelande med statuskod 404.
 
 
-3. Hur du använder products: 
+3. Hur du använder produkter
 
 Base URL: /api/products
 
-Samma som i users så kan du hämta, ändra, lägga till och ta bort produkter. 
-Varje produkt har ett ID, namn, pris och hur många antal av den som finns i lagret. 
+Samma som i users, du kan hämta, ändra, lägga till och ta bort produkter.
+Varje produkt har ett unikt ID, namn, pris och antal i lager.
 
 GET /api/products – Hämtar alla produkter.
 
@@ -53,15 +53,14 @@ GET /api/products/:productId – Hämtar en specifik produkt utifrån ID.
 
 POST /api/products – Skapar en ny produkt.
 
-Kräver fälten id, productName, price och amountInStock.
-
-ID:t måste vara unikt.
+Kräver fälten productName, price och amountInStock.
+ID genereras automatiskt och behöver inte skickas med.
 
 PUT /api/products/:id – Uppdaterar en eller flera egenskaper för produkten.
 
 DELETE /api/products/:id – Tar bort en produkt.
 
-Om du försöker skapa en produkt med ett ID som redan finns får du ett felmeddelande.
+Om du försöker skapa en produkt med samma genererade ID (extremt ovanligt) får du ett felmeddelande.
 Om du försöker uppdatera eller ta bort en produkt som inte finns får du status 404.
 
 4. Hur du använder cart: 
