@@ -10,8 +10,9 @@ export interface User {
 export interface Cart { 
     id: string;
     userId: string;
-    productIds: string[];
-    amount: number[];
+    //productIds: string[]; //Produkter och produktdata ligger separat i ITEM#PRODUCT# i DynamoDB
+    //amount: number[];     // Med de här två kodraderna kräver det en extra query för att hämta hela carten - 
+    //                          men förenklar tillägg/borttagning/uppdatering av enstaka varor +/-=0
 }
 
 export interface Products { 
