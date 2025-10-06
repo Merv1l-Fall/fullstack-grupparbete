@@ -10,8 +10,8 @@ export const ProductSchema = z.object({
     image: z.url({ message: "Image måste vara en giltig URL" }),
     amountInStock: z.string().min(1, { message: "Amount måste anges" })
   .refine(val => !isNaN(Number(val)) && Number(val) >= 0, {
-    message: "Amount måste vara ett nummer som är noll eller högre",
-  })
+    message: "Amount måste vara ett nummer som är noll eller högre"}),
+
 });
 
 export type ProductInput = z.infer<typeof ProductSchema>;
