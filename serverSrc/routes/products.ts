@@ -22,13 +22,13 @@ router.get('/:productId', async (req: Request, res: Response) => {
         }));
 
         if (result.Item) {
-            res.json(result.Item);
+            res.send(result.Item);
         } else {
-            res.status(404).json({ error: "Kan inte hitta produkten" });
+            res.status(404).send({ error: "Kan inte hitta produkten" });
         }
     } catch (error) {
         console.error("Fel vid hämtning av enskild produkt:", error);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).send({ error: "Internal server error" });
     }
 });
 
@@ -44,10 +44,10 @@ router.get('/', async (req: Request, res: Response) => {
             }
         }));
 
-        res.json(result.Items || []);
+        res.send(result.Items || []);
     } catch (error) {
         console.error("Fel vid hämtning av alla produkter", error);
-        res.status(500).json({ message: "Kunde inte hämta produkter", error: String(error) });
+        res.status(500).send({ message: "Kunde inte hämta produkter", error: String(error) });
     }
 });  
 
@@ -71,17 +71,17 @@ router.post("/", async (req: Request, res: Response) => {
 
     await db.send(command);
 
-    res.status(201).json({ message: "Produkten har skapats", product: item });//if succeed
+    res.status(201).send({ message: "Produkten har skapats", product: item });//if succeed
   } catch (err: any) {
     if (err.name === "ConditionalCheckFailedException") {
-      return res.status(400).json({ error: "Produkt med detta ID finns redan!" });//if duplicated
+      return res.status(400).send({ error: "Produkt med detta ID finns redan!" });//if duplicated
     }
     if (err.errors) {
       // Zod validation errors
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).send({ error: err.errors });
     }
     console.error("Fel vid skapande av produkt!", err);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).send({ error: "Internal server error" });
   }
 });
 
@@ -94,7 +94,7 @@ router.put('/:id', async (req, res) => {
     
     const parsed = PartialProductSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: z.treeifyError(parsed.error) });
+      return res.status(400).send({ error: z.treeifyError(parsed.error) });
     }
 
     const updates = parsed.data;
@@ -144,7 +144,7 @@ router.put('/:id', async (req, res) => {
       return res.status(404).send({ error: 'Not found' });
     }
 
-    return res.json(out.Attributes);
+    return res.send(out.Attributes);
   } catch (err) {
     console.error(err);
     return res.status(500).send({ error: 'Failed to update product' });
@@ -166,10 +166,10 @@ router.delete('/:productId', async (req: Request, res: Response) => {
 
     await db.send(command);
 
-    res.status(200).json({ message: "Produkt har tagits bort" });
+    res.status(200).send({ message: "Produkt har tagits bort" });
   } catch (error) {
     console.error("Fel vid borttagning av produkt:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).send({ error: "Internal server error" });
   }
 });
 

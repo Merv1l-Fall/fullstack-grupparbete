@@ -64,10 +64,10 @@ router.get(
 					.send({ message: "Ogiltig användardata från databasen" });
 			}
 
-			return res.status(200).json(parsed.data);
+			return res.status(200).send(parsed.data);
 		} catch (error) {
 			console.error("Fel vid hämtning av användare:", error);
-			res.status(500).json({ message: "Internt serverfel" });
+			res.status(500).send({ message: "Internt serverfel" });
 		}
 	}
 );
