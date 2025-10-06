@@ -10,7 +10,6 @@ import { GetCommand, PutCommand, DeleteCommand, ScanCommand, UpdateCommand } fro
 import { cryptoId } from "../utils/idGenerator.js";
 import { z } from "zod";
 
-const TABLE_NAME = "fullstack_grupparbete";       // Namnet på DynamoDB-tabellen
 
 // Definierar typer för cart items
 export interface CartItem {
@@ -63,7 +62,7 @@ router.get(
   "/:id",
   async (
     req: Request<{ id: string }, {}, {}, { userId?: string }>,
-    res: Response<{ message?: string; error?: any } | z.infer<typeof cartSchema>>
+    res: Response<{ message?: string; error?: any } | z.infer<typeof cartSchema> & {items: z.infer<typeof cartItemSchema>[]}>
   ) => {
 
     const paramsResult = idParamSchema.safeParse(req.params);
@@ -81,13 +80,13 @@ router.get(
       return res.status(400).json({ message: "userId krävs som query-param" });
     }
 
-    const SK = `CART#${id}`;
+    const cartSK = `CART#${id}`;
 
     try {
       const result = await db.send(
         new GetCommand({
           TableName: tableName,
-          Key: { PK: userId, SK },
+          Key: { PK: userId, SK: cartSK },
         })
       );
 
@@ -103,7 +102,23 @@ router.get(
         return res.status(400).json({ message: "Felaktig cart-data från databasen", error: tree });
       }
 
-      return res.status(200).json(parsed.data);
+      const itemsResult = await db.send(
+        new ScanCommand({
+            TableName: tableName,
+            FilterExpression: "begins_with(SK, :itemPrefix) AND PK = :pk",
+            ExpressionAttributeValues:{
+                ":itemPrefix": "ITEM#",
+                ":pk": `CART#${id}`,
+            }
+        })
+      )
+      const items: z.infer<typeof cartItemSchema>[] = (itemsResult.Items || [])
+      .map(item => cartItemSchema.safeParse(item))
+      .filter(p => p.success)
+      .map(p => p.data)
+
+      return res.status(200).json({...parsed.data, items});
+
     } catch (err) {
       console.error("DynamoDB GET error:", err);
       return res.status(500).json({ message: "Fel vid hämtning från DynamoDB" });
@@ -175,7 +190,7 @@ router.post(
 
       const productResult = await db.send(
         new GetCommand({
-          TableName: TABLE_NAME,
+          TableName: tableName,
           Key: {
             PK: productId,
             SK: "METADATA",
