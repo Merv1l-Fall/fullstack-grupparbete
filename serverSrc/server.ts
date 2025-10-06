@@ -8,7 +8,7 @@ import productsRouter from "./routes/products.js";
 import cartRouter from "./routes/cart.js"
 import userRouter from "./routes/users.js"
 
-const port: number = Number(process.env.PORT) || 3350;
+const port: number = 3350;
 const app: Express = express();
 
 // Middleware
