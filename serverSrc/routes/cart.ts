@@ -113,9 +113,9 @@ router.get(
         })
       )
       const items: z.infer<typeof cartItemSchema>[] = (itemsResult.Items || [])
-      .map(item => cartItemSchema.safeParse(item))
-      .filter(p => p.success)
-      .map(p => p.data)
+        .map(item => cartItemSchema.safeParse(item))
+        .filter(p => p.success)
+        .map(p => p.data)
 
       return res.status(200).json({...parsed.data, items});
 
