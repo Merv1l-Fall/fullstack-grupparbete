@@ -23,7 +23,7 @@ app.use(cors())
 app.use(express.json());
 app.use("/", express.static('./static-frontend/'))
 
-app.use("/api/products", productsRouter);
+app.use("/products", productsRouter);
 
 app.use("/cart", cartRouter)
 app.use("/users", userRouter);

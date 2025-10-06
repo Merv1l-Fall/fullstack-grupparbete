@@ -61,7 +61,7 @@ router.get(
 				console.error("Valideringsfel:", parsed.error);
 				return res
 					.status(400)
-					.send({ message: "Data matchar inte user" });
+					.send({ message: "Ogiltig användardata från databasen" });
 			}
 
 			return res.status(200).json(parsed.data);

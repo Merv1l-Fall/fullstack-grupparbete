@@ -6,6 +6,9 @@ API:et har tre huvud-delar, "products, users och cart".
 All data sparas i en DynamoDB-databas och skickas i JSON-format.
 Standard-adressen som används är: http://localhost:3350
 
+Börja med att klona repot till din dator och skriv sen npm i för att installera dependencies
+För att start servern skriver du först npm run build server och sen npm run start-server i din konsol
+
 1. DynamoDB: 
 I dynamodb har din tabell eller table ett table name. Det är där all data sparas (och hämtas ifrån).
 PK(Partition Key): Används för att gruppera objekt av samma kategori, tex "PRODUCT#123".

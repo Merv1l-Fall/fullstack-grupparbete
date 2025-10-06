@@ -24,6 +24,6 @@ export interface Products {
     productId: string;
     productName: string;
     price: number;
-    imageUrl: string;
+    image: string;
     amountInStock: string;
 }
