@@ -143,8 +143,8 @@ router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) =
     const newCart = {
       PK: `USER#${userId}`,   // Partition key
       SK: `CART#${cartId}`,   // Sort key
-      cartId: `CART#${cartId}`,   // Cart id
-      userId: `USER#${userId}`
+      cartId: cartId,   // Cart id
+      userId: userId
     };
 
     // Validering
@@ -239,7 +239,7 @@ router.post(
       const newCartItem = {
         PK: `CART#${cartId}`,
         SK: `ITEM#${productId}`,
-        cartId: `CART#${cartId}`,
+        cartId: cartId,
         productId,
         amount,
         userId

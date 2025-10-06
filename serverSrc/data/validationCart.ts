@@ -35,6 +35,7 @@ export const updateCartItemBodySchema = z.object({
 });
 // Vi genererar TS-typer automatiskt från schemat
 
+//Lägg till FRÅN validationCart.ts och använd dem som interface i cart.ts
+
 export type CartItem = z.infer<typeof cartItemSchema>;
-export type Cart = z.infer<typeof cartItemSchema>;
 export type Carts = z.infer<typeof cartsSchema>;
