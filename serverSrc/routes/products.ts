@@ -175,25 +175,3 @@ router.delete('/:productId', async (req: Request, res: Response) => {
 
 
 export default router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
