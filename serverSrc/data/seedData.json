@@ -1,0 +1,51 @@
+[
+
+  {
+    "PK": "USER#1",
+    "SK": "PROFILE",
+    "userId": "USER#1",
+    "userName": "Alice Johansson"
+  },
+  {
+    "PK": "USER#2",
+    "SK": "PROFILE",
+    "userId": "USER#2",
+    "userName": "Erik Svensson"
+  },
+
+ 
+  { "PK": "USER#1", "SK": "CART#101", "cartId": "CART#101"},
+  { "PK": "USER#2", "SK": "CART#201", "cartId": "CART#201"},
+
+  { "PK": "CART#101", "SK": "ITEM#PRODUCT#1", "cartId": "CART#101", "productId": "PRODUCT#1", "amount": 2 },
+  { "PK": "CART#101", "SK": "ITEM#PRODUCT#3", "cartId": "CART#101", "productId": "PRODUCT#3", "amount": 1 },
+  { "PK": "CART#101", "SK": "ITEM#PRODUCT#5", "cartId": "CART#101", "productId": "PRODUCT#5", "amount": 1 },
+  { "PK": "CART#101", "SK": "ITEM#PRODUCT#8", "cartId": "CART#101", "productId": "PRODUCT#8", "amount": 2 },
+  { "PK": "CART#101", "SK": "ITEM#PRODUCT#2", "cartId": "CART#101", "productId": "PRODUCT#2", "amount": 1 },
+
+  { "PK": "CART#201", "SK": "ITEM#PRODUCT#6", "cartId": "CART#201", "productId": "PRODUCT#6", "amount": 3 },
+  { "PK": "CART#201", "SK": "ITEM#PRODUCT#10", "cartId": "CART#201", "productId": "PRODUCT#10", "amount": 1 },
+  { "PK": "CART#201", "SK": "ITEM#PRODUCT#4", "cartId": "CART#201", "productId": "PRODUCT#4", "amount": 1 },
+  { "PK": "CART#201", "SK": "ITEM#PRODUCT#7", "cartId": "CART#201", "productId": "PRODUCT#7", "amount": 2 },
+
+  { "PK": "PRODUCT#1", "SK": "METADATA", "productId": "PRODUCT#1", "productName": "Wireless Mouse", "price": 299, "image": "https://geekd.se/cdn/shop/files/9785767f59f2c4b0c77fbc049ef385dc.jpg", "amountInStock": 50 },
+  { "PK": "PRODUCT#2", "SK": "METADATA", "productId": "PRODUCT#2", "productName": "Mechanical Keyboard", "price": 899, "image": "https://www.komplett.se/img/p/800/1171902.jpg", "amountInStock": 30 },
+  { "PK": "PRODUCT#3", "SK": "METADATA", "productId": "PRODUCT#3", "productName": "27\" 4K Monitor", "price": 3499, "image": "https://www.komplett.se/img/p/800/1222846.jpg", "amountInStock": 15 },
+  { "PK": "PRODUCT#4", "SK": "METADATA", "productId": "PRODUCT#4", "productName": "USB-C Hub", "price": 499, "image": "https://www.komplett.se/img/p/1200/1248254.jpg", "amountInStock": 40 },
+  { "PK": "PRODUCT#5", "SK": "METADATA", "productId": "PRODUCT#5", "productName": "External SSD 1TB", "price": 1299, "image": "https://www.komplett.se/img/p/1200/1200775.jpg", "amountInStock": 20 },
+  { "PK": "PRODUCT#6", "SK": "METADATA", "productId": "PRODUCT#6", "productName": "Gaming Headset", "price": 699, "image": "https://www.komplett.se/img/p/1000/1162749.jpg", "amountInStock": 25 },
+  { "PK": "PRODUCT#7", "SK": "METADATA", "productId": "PRODUCT#7", "productName": "Webcam Full HD", "price": 399, "image": "https://www.komplett.se/img/p/1200/856419.jpg", "amountInStock": 35 },
+  { "PK": "PRODUCT#8", "SK": "METADATA", "productId": "PRODUCT#8", "productName": "Portable Charger 20000mAh", "price": 599, "image": "https://www.komplett.se/img/p/519/1303904.jpg", "amountInStock": 60 },
+  { "PK": "PRODUCT#9", "SK": "METADATA", "productId": "PRODUCT#9", "productName": "Bluetooth Speaker", "price": 499, "image": "https://www.komplett.se/img/p/1200/1306199.jpg", "amountInStock": 45 },
+  { "PK": "PRODUCT#10", "SK": "METADATA", "productId": "PRODUCT#10", "productName": "Smartwatch", "price": 1999, "image": "https://www.komplett.se/img/p/1200/1309708.jpg", "amountInStock": 18 },
+  { "PK": "PRODUCT#11", "SK": "METADATA", "productId": "PRODUCT#11", "productName": "Noise Cancelling Earbuds", "price": 1299, "image": "https://www.komplett.se/img/p/1599/1322579.jpg", "amountInStock": 28 },
+  { "PK": "PRODUCT#12", "SK": "METADATA", "productId": "PRODUCT#12", "productName": "Smartphone Stand", "price": 149, "image": "https://www.komplett.se/img/p/1600/1310805_2.jpg", "amountInStock": 80 },
+  { "PK": "PRODUCT#13", "SK": "METADATA", "productId": "PRODUCT#13", "productName": "Laptop Backpack", "price": 799, "image": "https://www.komplett.se/img/p/780/1248259.jpg", "amountInStock": 22 },
+  { "PK": "PRODUCT#14", "SK": "METADATA", "productId": "PRODUCT#14", "productName": "Ergonomic Office Chair", "price": 2499, "image": "https://www.komplett.se/img/p/3200/1314628.jpg", "amountInStock": 10 },
+  { "PK": "PRODUCT#15", "SK": "METADATA", "productId": "PRODUCT#15", "productName": "Desk Lamp LED", "price": 349, "image": "https://www.komplett.se/img/p/1600/1326992.jpg", "amountInStock": 55 },
+  { "PK": "PRODUCT#16", "SK": "METADATA", "productId": "PRODUCT#16", "productName": "Wi-Fi Router AX3000", "price": 1599, "image": "https://www.komplett.se/img/p/1200/1224284.jpg", "amountInStock": 14 },
+  { "PK": "PRODUCT#17", "SK": "METADATA", "productId": "PRODUCT#17", "productName": "USB Flash Drive 128GB", "price": 199, "image": "https://www.komplett.se/img/p/1680/1219563.jpg", "amountInStock": 100 },
+  { "PK": "PRODUCT#18", "SK": "METADATA", "productId": "PRODUCT#18", "productName": "Drawing Tablet", "price": 2499, "image": "https://www.komplett.se/img/p/1200/1133140.jpg", "amountInStock": 12 },
+  { "PK": "PRODUCT#19", "SK": "METADATA", "productId": "PRODUCT#19", "productName": "VR Headset", "price": 3999, "image": "https://www.komplett.se/img/p/1200/1253262.jpg", "amountInStock": 8 },
+  { "PK": "PRODUCT#20", "SK": "METADATA", "productId": "PRODUCT#20", "productName": "Portable Projector", "price": 3299, "image": "https://www.komplett.se/img/p/1200/1137581.jpg", "amountInStock": 6 }
+]

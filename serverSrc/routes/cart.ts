@@ -5,7 +5,7 @@ import type { Request, Response } from "express";   // Importerar typer från Ex
 import { Router } from "express";                  // Router för att definiera routes
 import express from "express";                     // Express-framework
 import { cartItemSchema, cartsSchema, cartSchema, updateCartItemBodySchema, updateCartItemParamsSchema } from "../data/validationCart.js";  // Zod-schema för validering av cart items
-import { db } from "../data/dynamoDb.js";         // DynamoDB-klient
+import { db, tableName } from "../data/dynamoDb.js";         // DynamoDB-klient
 import { GetCommand, PutCommand, DeleteCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb"; // DynamoDB-kommandon
 import { cryptoId } from "../utils/idGenerator.js";
 import { z } from "zod";
@@ -33,7 +33,7 @@ router.get("/", async (req: Request<{}, {}, {}>, res: Response<z.infer<typeof ca
   try {
     const result = await db.send(
       new ScanCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         FilterExpression: "begins_with(#sk, :prefix)",  // Filtrera för poster där SK börjar med "CART#"
         ExpressionAttributeNames: { "#sk": "SK" },      // Alias för SK eftersom SK är reserverat ord
         ExpressionAttributeValues: { ":prefix": "CART#" }, // Prefix att jämföra med
@@ -86,7 +86,7 @@ router.get(
     try {
       const result = await db.send(
         new GetCommand({
-          TableName: TABLE_NAME,
+          TableName: tableName,
           Key: { PK: userId, SK },
         })
       );
@@ -137,7 +137,7 @@ router.post("/", async (req: Request<{}, {}, {userId?:string}>, res: Response) =
 
     await db.send(
       new PutCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Item: newCart,
       })
     );
@@ -189,7 +189,7 @@ router.post(
 
       const existingItem = await db.send(
         new GetCommand({
-          TableName: TABLE_NAME,
+          TableName: tableName,
           Key: {
             PK: `CART#${cartId}`,
             SK: `ITEM#${productId}`,
@@ -202,7 +202,7 @@ router.post(
 
         const updateResult = await db.send(
           new UpdateCommand({
-            TableName: TABLE_NAME,
+            TableName: tableName,
             Key: {
               PK: `CART#${cartId}`,
               SK: `ITEM#${productId}`,
@@ -234,7 +234,7 @@ router.post(
 
       await db.send(
         new PutCommand({
-          TableName: TABLE_NAME,
+          TableName: tableName,
           Item: newCartItem,
         })
       );
@@ -269,7 +269,7 @@ router.put("/:cartId/items/:productId", async (req: Request<{ productId: string 
 
     const result = await db.send(
       new UpdateCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { 
           PK: `USER#${userId}`,   // Partition key för cart
           SK: `ITEM#${productId}` // Sort key för item
@@ -308,7 +308,7 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
 
     await db.send(
       new DeleteCommand({
-        TableName: TABLE_NAME,
+        TableName: tableName,
         Key: { PK, SK }, // Tar bort cart från DynamoDB
       })
     );
@@ -321,49 +321,61 @@ router.delete("/:cartId", async (req: Request<{ cartId: string, userId: string }
 });
 
 // DELETE - Rensa bort felaktiga carts (låter USERS och PRODUCTS vara ifred) -> (SE ÖVER DETTA, verkar ha tagit bort products och carts?)
-router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
-  try {
-    const result = await db.send(
-      new ScanCommand({
-        TableName: TABLE_NAME,
-      })
-    );
+// router.delete("/cleanup/all", async (req: Request<{},{},{}>, res: Response) => {
+//   try {
+//     const result = await db.send(
+//       new ScanCommand({
+//         TableName: tableName,
+//       })
+//     );
 
-    let deleted: any[] = [];
+//     let deleted: any[] = [];
 
-    for (const item of result.Items || []) {
-      // Vi rensar bara carts → alltså poster där SK börjar med CART#
-      if (typeof item.SK === "string" && item.SK.startsWith("CART#")) {
-        const pkOk = typeof item.PK === "string" && item.PK.startsWith("USER#");
-        const skOk =
-          typeof item.SK === "string" &&
-          item.SK.startsWith("CART#") &&
-          !item.SK.startsWith("CART#CART#"); // inga dubblade CART#
+//     for (const item of result.Items || []) {
+//       // Vi rensar bara carts → alltså poster där SK börjar med CART#
+//       if (typeof item.SK === "string" && item.SK.startsWith("CART#")) {
+//         const pkOk = typeof item.PK === "string" && item.PK.startsWith("USER#");
+//         const skOk =
+//           typeof item.SK === "string" &&
+//           item.SK.startsWith("CART#") &&
+//           !item.SK.startsWith("CART#CART#"); // inga dubblade CART#
 
-        const userIdOk = item.userId === item.PK; // userId måste matcha PK
+//         const userIdOk = item.userId === item.PK; // userId måste matcha PK
 
+//         // Om något av villkoren inte stämmer → ta bort cart
+//         if (!pkOk || !skOk || !userIdOk) {
+//           await db.send(
+//             new DeleteCommand({
+//               TableName: tableName,
+//               Key: { PK: item.PK, SK: item.SK }
+//             })
+//           );
+//           deleted.push({ PK: item.PK, SK: item.SK });
+//         }
+//       }
+//     }
         // Om något av villkoren inte stämmer, ta bort cart
-        if (!pkOk || !skOk || !userIdOk) {
-          await db.send(
-            new DeleteCommand({
-              TableName: TABLE_NAME,
-              Key: { PK: item.PK, SK: item.SK }
-            })
-          );
-          deleted.push({ PK: item.PK, SK: item.SK });
-        }
-      }
-    }
+    //     if (!pkOk || !skOk || !userIdOk) {
+    //       await db.send(
+    //         new DeleteCommand({
+    //           TableName: TABLE_NAME,
+    //           Key: { PK: item.PK, SK: item.SK }
+    //         })
+    //       );
+    //       deleted.push({ PK: item.PK, SK: item.SK });
+    //     }
+    //   }
+//    }
 
-    res.status(200).json({
-      message: "Rensning klar endast carts har påverkats",
-      deleted
-    });
-  } catch (err) {
-    console.error("DynamoDB Cleanup error:", err);
-    res.status(500).json({ message: "Fel vid rensning" });
-  }
-});
+//     res.status(200).json({
+//       message: "Rensning klar endast carts har påverkats",
+//       deleted
+//     });
+//   } catch (err) {
+//     console.error("DynamoDB Cleanup error:", err);
+//     res.status(500).json({ message: "Fel vid rensning" });
+//   }
+// });
 
 export default router; // Exporterar router för användning i server.ts
 

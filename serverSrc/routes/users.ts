@@ -1,6 +1,6 @@
 //importer
 import { Router } from "express";
-import { db } from "../data/dynamoDb.js";
+import { db, tableName } from "../data/dynamoDb.js";
 import type { Request, Response } from "express";
 import type { User } from "../data/types.js";
 import { cryptoId } from "../utils/idGenerator.js";
@@ -22,7 +22,6 @@ import {
 import { uuid } from "zod";
 
 const router: Router = Router();
-const tableName: string = "fullstack_grupparbete";
 
 // Local types
 type UserIdParam = {
@@ -62,13 +61,13 @@ router.get(
 				console.error("Valideringsfel:", parsed.error);
 				return res
 					.status(400)
-					.send({ message: "Data matchar inte user" });
+					.send({ message: "Ogiltig användardata från databasen" });
 			}
 
-			return res.status(200).json(parsed.data);
+			return res.status(200).send(parsed.data);
 		} catch (error) {
 			console.error("Fel vid hämtning av användare:", error);
-			res.status(500).json({ message: "Internt serverfel" });
+			res.status(500).send({ message: "Internt serverfel" });
 		}
 	}
 );
