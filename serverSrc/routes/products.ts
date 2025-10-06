@@ -55,13 +55,13 @@ router.get('/', async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     // validate input with Zod
-	const pk: string = `PRODUCT#${cryptoId()}`;
+	const randomId: string = cryptoId(8);
     const parsed = ProductSchema.parse(req.body);
 
     const item = {
-      PK: pk,
+      PK: `PRODUCT#${randomId}`,
       SK: "METADATA",
-	  productId: pk,
+	  productId: randomId,
       ...parsed,
     };
 

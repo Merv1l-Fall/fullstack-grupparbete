@@ -27,3 +27,7 @@ export interface Products {
     image: string;
     amountInStock: string;
 }
+
+export interface ResponseMessage {
+	message: string;
+}
