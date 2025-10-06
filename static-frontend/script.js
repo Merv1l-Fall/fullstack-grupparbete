@@ -15,40 +15,27 @@ document.getElementById('load-products-btn').addEventListener('click', async () 
 
   try {
     const res = await fetch(API_BASE);
+    if (!res.ok) throw new Error(`Serverfel: ${res.status}`);
+    const products = await res.json();
 
-    console.log('Fetch status:', res.status, res.statusText);
-    console.log('Content-Type:', res.headers.get('content-type'));
-
-    if (!res.ok) {
-      const txt = await res.text().catch(() => '');
-      throw new Error(`Server svarade ${res.status}: ${txt}`);
-    }
-
-    const ct = res.headers.get('content-type') || '';
-    if (!ct.includes('application/json')) {
-      const txt = await res.text();
-      console.error('Fick icke-JSON-svar från /products:', txt);
-      status.textContent = 'Fel: server returnerade icke-JSON. Se konsolen.';
-      return;
-    }
-
-    const products = await res.send();
-    if (!Array.isArray(products) || products.length === 0) {
+    if (products.length === 0) {
       status.textContent = 'Inga produkter hittades.';
       return;
     }
 
+    // 🟢 Bygg HTML utifrån rätt fältnamn
     const html = products.map(p => `
       <div class="product-card">
-        ${p.url ? `<img src="${p.url}" alt="${p.name || ''}">` : ''}
-        <h3>${p.name || 'Namnlös'}</h3>
-        <p>Pris: ${p.price ?? '-'} kr</p>
-        <small>ID: ${p.productId || p.PK || '-'}</small>
+        <h3>${p.productName}</h3>
+        <p><strong>Pris:</strong> ${p.price} kr</p>
+        <p><strong>Lager:</strong> ${p.amountInStock}</p>
+        
+        <small>${p.PK}</small>
       </div>
     `).join('');
 
     container.innerHTML += `<div class="products-grid">${html}</div>`;
-    status.textContent = `Visar ${products.length} produkter (dom visas under README).`;
+    status.textContent = `Visar ${products.length} produkter(dom visas under README texten).`;
   } catch (err) {
     console.error('Fel vid hämtning:', err);
     status.textContent = `Fel: ${err.message}`;
