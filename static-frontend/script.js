@@ -23,7 +23,7 @@ document.getElementById('load-products-btn').addEventListener('click', async () 
       return;
     }
 
-    // 🟢 Bygg HTML utifrån rätt fältnamn
+    //html för products
     const html = products.map(p => `
       <div class="product-card">
         <h3>${p.productName}</h3>

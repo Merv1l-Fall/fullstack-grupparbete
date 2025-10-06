@@ -103,7 +103,7 @@ router.put('/:id', async (req, res) => {
 
   
     if (Object.keys(updates).length === 0) {
-      return res.status(400).send({ error: 'Nothing to update' });
+      return res.status(400).send({ error: 'Finns inget att uppdatera' });
     }
 
     
@@ -143,13 +143,13 @@ router.put('/:id', async (req, res) => {
     }));
 
     if (!out.Attributes) {
-      return res.status(404).send({ error: 'Not found' });
+      return res.status(404).send({ error: 'Kan inte hittas' });
     }
 
     return res.send(out.Attributes);
   } catch (err) {
     console.error(err);
-    return res.status(500).send({ error: 'Failed to update product' });
+    return res.status(500).send({ error: 'Kunde inte uppdatera produkt' });
   }
 });
 
