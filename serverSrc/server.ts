@@ -1,30 +1,35 @@
-import express from 'express'
-import type { Express, Request, RequestHandler, Response } from 'express'
+// src/server.ts
+import express from "express";
+import cors from "cors";
+import type { Express, RequestHandler } from "express";
 
 
-const port: number = Number(process.env.PORT)
-const app: Express = express()
+import productsRouter from "./routes/products.js";
+import cartRouter from "./routes/cart.js"
+import userRouter from "./routes/users.js"
 
+const port: number = 3350;
+const app: Express = express();
 
 // Middleware
 const logger: RequestHandler = (req, res, next) => {
-	console.log(`${req.method}  ${req.url}`)
-	next()
-}
-app.use('/', logger)
-app.use('/', express.json())
-
-// Resurser (routermoduler med endpoints)
+  console.log(`${req.method} ${req.url}`);
+  next();
+};
 
 
+app.use(logger);
+app.use(cors())
+app.use(express.json());
+app.use("/", express.static('./static-frontend/'))
 
-// Endpoints
+app.use("/products", productsRouter);
+
+app.use("/cart", cartRouter)
+app.use("/users", userRouter);
 
 
-
-
-
-// Starta servern
+// Start server
 app.listen(port, () => {
-	console.log('Server listening on port ' + port)
-})
+  console.log("Server listening on port " + port);
+});
