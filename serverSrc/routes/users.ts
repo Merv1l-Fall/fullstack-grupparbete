@@ -109,7 +109,7 @@ router.get("/", async (req, res: Response<User[] | { message: string }>) => {
 
 //POST api/user - Skapa en användare
 
-router.post("/", async (req, res: Response<{ message: string }>) => {
+router.post("/", async (req: Request<CreateUserBody>, res: Response<{ message: string }>) => {
 	const userData: CreateUserBody = req.body;
 	// Validera inkommande data
 	const parseResult = UserNameSchema.safeParse(userData);
