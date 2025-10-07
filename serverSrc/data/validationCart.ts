@@ -22,7 +22,6 @@ export const cartSchema = z.object({
 })
 
 export const cartsSchema = z.array(cartSchema);
-export const cartItemsSchema = z.array(cartItemSchema);
 
 export const updateCartItemParamsSchema = z.object({
   productId: z.string().nonempty("productId krävs"),
@@ -33,8 +32,40 @@ export const updateCartItemBodySchema = z.object({
   amount: z.number().int().positive("amount måste vara ett positivt heltal"),
   userId: z.string().nonempty("userId krävs")
 });
-// Vi genererar TS-typer automatiskt från schemat
 
-export type CartItem = z.infer<typeof cartItemSchema>;
-export type Cart = z.infer<typeof cartItemSchema>;
-export type Carts = z.infer<typeof cartsSchema>;
+export const createCartBodySchema = z.object({
+  userId: z.string().nonempty("userId krävs"),
+});
+
+export interface CartItem {
+  cartId: string;
+  productId: string;
+  amount: number;
+  PK: string;
+  SK: string;
+  userId?: string;
+}
+
+export interface Cart {
+  cartId: string;
+  PK: string;
+  SK: string;
+  userId?: string;
+}
+
+export const addCartItemBodySchema = z.object({
+  productId: z.string().nonempty("productId krävs"),
+  amount: z.number().int().positive("amount måste vara ett positivt heltal"),
+  userId: z.string().nonempty("userId krävs"),
+});
+
+export interface AddCartItemBody {
+  productId: string;
+  amount: number;
+  userId: string;
+}
+
+export type Carts = Cart[];
+export type UpdateCartItemParams = z.infer<typeof updateCartItemParamsSchema>;
+export type UpdateCartItemBody = z.infer<typeof updateCartItemBodySchema>;
+export type CreateCartBody = z.infer<typeof createCartBodySchema>;
