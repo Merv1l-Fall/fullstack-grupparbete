@@ -1,4 +1,3 @@
-// src/routes/products.ts
 import express, { Router } from "express";
 import type { Request, Response } from "express";
 import { DeleteCommand, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
@@ -7,51 +6,51 @@ import {z} from "zod";
 import { ProductSchema, type ProductInput } from "../data/validationProduct.js";
 import { cryptoId } from "../utils/idGenerator.js";
 
+
 const router: Router = express.Router();
 
-// Get a single product by ID
+// GET /:productId
 router.get('/:productId', async (req: Request, res: Response) => {
-    try {
-        const productId = req.params.productId;
-        const result = await db.send(new GetCommand({
-            TableName: tableName,
-            Key: {
-                PK: `PRODUCT#${productId}`,
-                SK: "METADATA"
-            }
-        }));
+  const productId = req.params.productId;
+  try {
+    const result = await db.send(new GetCommand({
+      TableName: tableName,
+      Key: {
+        PK: `PRODUCT#${productId}`,
+        SK: "METADATA"
+      }
+    }));
 
-        if (result.Item) {
-            res.send(result.Item);
-        } else {
-            res.status(404).send({ error: "Kan inte hitta produkten" });
-        }
-    } catch (error) {
-        console.error("Fel vid hämtning av enskild produkt:", error);
-        res.status(500).send({ error: "Internal server error" });
+    if (result.Item) {
+      res.json(result.Item);
+    } else {
+      res.status(404).json({ error: "Kan inte hitta produkten" });
     }
+  } catch (error) {
+    console.error("Fel vid hämtning av enskild produkt:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
-// Get all products
-router.get('/', async (req: Request, res: Response) => {
-    try {
-        const result = await db.send(new ScanCommand({
-            TableName: tableName,
-            FilterExpression: "begins_with(PK, :pk)",
-            ExpressionAttributeValues: {
-                ":pk": "PRODUCT#",
-				// ":sk": "METADATA"
-            }
-        }));
+// GET all products/
+router.get('/', async (_req: Request, res: Response) => {
+  try {
+    const result = await db.send(new ScanCommand({
+      TableName: tableName,
+      FilterExpression: "begins_with(PK, :pk)",
+      ExpressionAttributeValues: {
+        ":pk": "PRODUCT#"
+      }
+    }));
 
-        res.send(result.Items || []);
-    } catch (error) {
-        console.error("Fel vid hämtning av alla produkter", error);
-        res.status(500).send({ message: "Kunde inte hämta produkter", error: String(error) });
-    }
-});  
+    res.json(result.Items || []);
+  } catch (error) {
+    console.error("Fel vid hämtning av alla produkter", error);
+    res.status(500).json({ message: "Kunde inte hämta produkter", error: String(error) });
+  }
+});
 
-// Create a new product
+// POST (creat a new product)/
 router.post("/", async (req: Request, res: Response) => {
   try {
     // validate input with Zod
@@ -68,7 +67,7 @@ router.post("/", async (req: Request, res: Response) => {
     const command = new PutCommand({
       TableName: tableName,
       Item: item,
-      ConditionExpression: "attribute_not_exists(PK)", //prevent duplicate
+      ConditionExpression: "attribute_not_exists(PK)",
     });
 
     await db.send(command);
@@ -155,9 +154,9 @@ router.put('/:id', async (req, res) => {
 
 // Delete a product by ID
 router.delete('/:productId', async (req: Request, res: Response) => {
-  try {
-    const productId = req.params.productId;
+  const productId = req.params.productId;
 
+  try {
     const command = new DeleteCommand({
       TableName: tableName,
       Key: {
@@ -174,6 +173,5 @@ router.delete('/:productId', async (req: Request, res: Response) => {
     res.status(500).send({ error: "Internal server error" });
   }
 });
-
 
 export default router;
