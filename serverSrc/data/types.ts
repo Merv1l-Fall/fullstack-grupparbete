@@ -8,16 +8,26 @@ export interface User {
 }
 
 export interface Cart { 
-    id: string;
+    cartId: string;
     userId: string;
-    productIds: string[];
-    amount: number[];
+    // productIds: string[];
+    // amount: number[];
+}
+
+export interface CartItem { 
+	cartId: string;
+	productId: string;
+	amount: number;
 }
 
 export interface Products { 
-    id: string;
+    productId: string;
     productName: string;
     price: number;
-   imageUrl?: string;//optional
+    image: string;
     amountInStock: string;
+}
+
+export interface ResponseMessage {
+	message: string;
 }

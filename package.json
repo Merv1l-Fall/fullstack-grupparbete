@@ -7,7 +7,8 @@
 	"scripts": {
 		"start-server": "node --env-file .env ./dist/server.js",
 		"build-server": "tsc",
-		"restart": "npm run build-server && npm run start-server"
+		"restart": "npm run build-server && npm run start-server",
+		"resetDb": "npm run build-server && node --env-file .env ./dist/utils/resetDb.js"
 	},
 	"repository": {
 		"type": "git",
@@ -21,8 +22,8 @@
 	},
 	"homepage": "https://github.com/Merv1l-Fall/fullstack-grupparbete#readme",
 	"dependencies": {
-		"@aws-sdk/client-dynamodb": "^3.896.0",
-		"@aws-sdk/lib-dynamodb": "^3.896.0",
+		"@aws-sdk/client-dynamodb": "^3.901.0",
+		"@aws-sdk/lib-dynamodb": "^3.901.0",
 		"cors": "^2.8.5",
 		"express": "^5.1.0",
 		"uuid": "^13.0.0",

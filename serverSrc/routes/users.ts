@@ -1,8 +1,8 @@
 //importer
 import { Router } from "express";
-import { db } from "../data/dynamoDb.js";
+import { db, tableName } from "../data/dynamoDb.js";
 import type { Request, Response } from "express";
-import type { User } from "../data/types.js";
+import type { User, ResponseMessage } from "../data/types.js";
 import { cryptoId } from "../utils/idGenerator.js";
 import {
 	UserSchema,
@@ -10,7 +10,6 @@ import {
 	UserNameSchema,
 } from "../data/validationUsers.js";
 import {
-	QueryCommand,
 	PutCommand,
 	DeleteCommand,
 	UpdateCommand,
@@ -19,10 +18,8 @@ import {
 	type ScanCommandOutput,
 	type GetCommandOutput,
 } from "@aws-sdk/lib-dynamodb";
-import { uuid } from "zod";
 
 const router: Router = Router();
-const tableName: string = "fullstack_grupparbete";
 
 // Local types
 type UserIdParam = {
@@ -37,7 +34,7 @@ router.get(
 	"/:id",
 	async (
 		req: Request<UserIdParam>,
-		res: Response<User | { message: string }>
+		res: Response<User | ResponseMessage>
 	) => {
 		try {
 			const userId: string = `USER#${req.params.id}`;
@@ -62,19 +59,19 @@ router.get(
 				console.error("Valideringsfel:", parsed.error);
 				return res
 					.status(400)
-					.send({ message: "Data matchar inte user" });
+					.send({ message: "Ogiltig användardata från databasen" });
 			}
 
-			return res.status(200).json(parsed.data);
+			return res.status(200).send(parsed.data);
 		} catch (error) {
 			console.error("Fel vid hämtning av användare:", error);
-			res.status(500).json({ message: "Internt serverfel" });
+			res.status(500).send({ message: "Internt serverfel" });
 		}
 	}
 );
 
 //GET api/user - Hämta alla användare
-router.get("/", async (req, res: Response<User[] | { message: string }>) => {
+router.get("/", async (req, res: Response<User[] | ResponseMessage>) => {
 	const result: ScanCommandOutput = await db.send(
 		new ScanCommand({
 			TableName: tableName,
@@ -110,21 +107,21 @@ router.get("/", async (req, res: Response<User[] | { message: string }>) => {
 
 //POST api/user - Skapa en användare
 
-router.post("/", async (req, res: Response<{ message: string }>) => {
-	const userData: CreateUserBody = req.body;
+router.post("/", async (req: Request<CreateUserBody>, res: Response<ResponseMessage>) => {
 	// Validera inkommande data
-	const parseResult = UserNameSchema.safeParse(userData);
+	const parseResult = UserNameSchema.safeParse(req.body);
 	if (!parseResult.success) {
 		res.status(400).send({ message: "Ogiltig användardata" });
 		return;
 	}
+	const userData: CreateUserBody = parseResult.data;
 	//slumpa ett Id till användaren och skapa objektet
-	const pk: string = `USER#${cryptoId()}`;
+	const randomId: string = cryptoId(8);
 	const newUser: User = {
-		PK: pk,
+		PK: `USER#${randomId}`,
 		SK: "PROFILE",
-		userId: pk,
-		userName: parseResult.data.userName,
+		userId: randomId,
+		userName: userData.userName,
 	};
 	//spara i db
 	try {
@@ -144,7 +141,7 @@ router.post("/", async (req, res: Response<{ message: string }>) => {
 // PUT api/user/:id - Uppdatera en användare
 router.put(
 	"/:id",
-	async (req: Request<UserIdParam>, res: Response<{ message: string }>) => {
+	async (req: Request<UserIdParam>, res: Response<ResponseMessage>) => {
 		const userId: string = `USER#${req.params.id}`;
 		const userData: CreateUserBody = req.body;
 		// Validera inkommande data
@@ -178,7 +175,7 @@ router.put(
 // DELETE api/user/:id - Radera en användare
 router.delete(
 	"/:id",
-	async (req: Request<UserIdParam>, res: Response<{ message: string }>) => {
+	async (req: Request<UserIdParam>, res: Response<ResponseMessage>) => {
 		const userId: string = `USER#${req.params.id}`;
 		try {
 			const deleteCommand = new DeleteCommand({
