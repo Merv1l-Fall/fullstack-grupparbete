@@ -1,3 +1,153 @@
-export {};
-//GET PUT POST DELETE etc för users
+//importer
+import { Router } from "express";
+import { db } from "../data/dynamoDb.js";
+import { cryptoId } from "../utils/idGenerator.js";
+import { UserSchema, UserArraySchema, UserNameSchema, } from "../data/validationUsers.js";
+import { QueryCommand, PutCommand, DeleteCommand, UpdateCommand, ScanCommand, GetCommand, } from "@aws-sdk/lib-dynamodb";
+import { uuid } from "zod";
+const router = Router();
+const tableName = "fullstack_grupparbete";
+//GET:id api/user/:id - Hämta en användare med id
+router.get("/:id", async (req, res) => {
+    try {
+        const userId = `USER#${req.params.id}`;
+        const getCommand = new GetCommand({
+            TableName: tableName,
+            Key: {
+                PK: userId,
+                SK: "PROFILE",
+            },
+        });
+        const result = await db.send(getCommand);
+        if (!result.Item) {
+            res.status(404).send({ message: "Användare hittades inte" });
+            return;
+        }
+        const parsed = UserSchema.safeParse(result.Item);
+        if (!parsed.success) {
+            console.error("Valideringsfel:", parsed.error);
+            return res
+                .status(400)
+                .send({ message: "Data matchar inte user" });
+        }
+        return res.status(200).json(parsed.data);
+    }
+    catch (error) {
+        console.error("Fel vid hämtning av användare:", error);
+        res.status(500).json({ message: "Internt serverfel" });
+    }
+});
+//GET api/user - Hämta alla användare
+router.get("/", async (req, res) => {
+    const result = await db.send(new ScanCommand({
+        TableName: tableName,
+        FilterExpression: "SK = :profile",
+        ExpressionAttributeValues: {
+            ":profile": "PROFILE",
+        },
+    }));
+    if (!result.Items || result.Count === undefined) {
+        res.sendStatus(500);
+        return;
+    }
+    // Validera items med zod
+    const parseResult = UserArraySchema.safeParse(result.Items);
+    if (!parseResult.success) {
+        console.error("Resultat från databasen matchar inte User-array:", result.Items, parseResult.error);
+        res.status(400).send({
+            message: "Ogiltig användardata från databasen",
+        });
+        return;
+    }
+    const users = parseResult.data;
+    res.send(users);
+});
+//POST api/user - Skapa en användare
+router.post("/", async (req, res) => {
+    const userData = req.body;
+    // Validera inkommande data
+    const parseResult = UserNameSchema.safeParse(userData);
+    if (!parseResult.success) {
+        res.status(400).send({ message: "Ogiltig användardata" });
+        return;
+    }
+    //slumpa ett Id till användaren och skapa objektet
+    const pk = `USER#${cryptoId()}`;
+    const newUser = {
+        PK: pk,
+        SK: "PROFILE",
+        userId: pk,
+        userName: parseResult.data.userName,
+    };
+    //spara i db
+    try {
+        const putCommand = new PutCommand({
+            TableName: tableName,
+            Item: newUser,
+            ConditionExpression: "attribute_not_exists(PK)", // Förhindra överskrivning
+        });
+        await db.send(putCommand);
+        res.status(201).send({ message: "Användare skapad" });
+    }
+    catch (error) {
+        console.error("Fel vid skapande av användare:", error);
+        res.status(500).send({ message: "Internt serverfel" });
+    }
+});
+// PUT api/user/:id - Uppdatera en användare
+router.put("/:id", async (req, res) => {
+    const userId = `USER#${req.params.id}`;
+    const userData = req.body;
+    // Validera inkommande data
+    const parseResult = UserNameSchema.safeParse(userData);
+    if (!parseResult.success) {
+        res.status(400).send({ message: "Ogiltig användardata" });
+        return;
+    }
+    try {
+        const updateCommand = new UpdateCommand({
+            TableName: tableName,
+            Key: {
+                PK: userId,
+                SK: "PROFILE",
+            },
+            UpdateExpression: "SET userName = :userName",
+            ExpressionAttributeValues: {
+                ":userName": parseResult.data.userName,
+            },
+            ConditionExpression: "attribute_exists(PK)", // Säkerställ att användaren finns
+        });
+        await db.send(updateCommand);
+        res.status(200).send({ message: "Användare uppdaterad" });
+    }
+    catch (error) {
+        console.error("Fel vid uppdatering av användare:", error);
+        res.status(500).send({ message: "Internt serverfel" });
+    }
+});
+// DELETE api/user/:id - Radera en användare
+router.delete("/:id", async (req, res) => {
+    const userId = `USER#${req.params.id}`;
+    try {
+        const deleteCommand = new DeleteCommand({
+            TableName: tableName,
+            Key: {
+                PK: userId,
+                SK: "PROFILE",
+            },
+            ConditionExpression: "attribute_exists(PK)", // Säkerställ att användaren finns
+        });
+        await db.send(deleteCommand);
+        res.status(200).send({ message: "Användare raderad" });
+    }
+    catch (error) {
+        if (error.name === "ConditionalCheckFailedException") {
+            res.status(404).send({ message: "Användare hittades inte" });
+            return;
+        }
+        console.error("Fel vid radering av användare:", error);
+        res.status(500).send({ message: "Internt serverfel" });
+    }
+});
+export default router;
 //# sourceMappingURL=users.js.map

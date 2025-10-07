@@ -16,8 +16,8 @@ export interface Cart {
 
 export interface Products { 
     id: string;
-    name: string;
+    productName: string;
     price: number;
-    imageUrl: string;
+   imageUrl?: string;//optional
     amountInStock: string;
 }

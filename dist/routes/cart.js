@@ -3,7 +3,8 @@ import express from 'express';
 import fs from "fs"; //-> TODO
 import path from "path"; //-> TODO
 import { cartItemSchema, cartsSchema } from "../data/validationCart.js";
-import { v4 as uuidv4 } from "uuid"; //För unika id:n -> skapar unika id så vi slipper skriva en funktion fört
+// import { v4 as uuidv4 } from "uuid"; //För unika id:n -> skapar unika id så vi slipper skriva en funktion fört
+import { cryptoId } from "../utils/idGenerator.js";
 const router = express.Router();
 const cartFilePath = path.join(__dirname, "../data/cart.json"); //En sökväg till cart.json i data-mappen
 const readCartData = () => {
@@ -27,7 +28,7 @@ router.get("/", (req, res) => {
 // POST - Skapa en NY kundvagn
 router.post("/", (req, res) => {
     const carts = readCartData();
-    const newCart = { ...req.body, id: uuidv4() }; //Skapar unikt nytt ID
+    const newCart = { ...req.body, id: cryptoId() }; //Skapar unikt nytt ID
     try {
         cartItemSchema.parse(newCart);
     }

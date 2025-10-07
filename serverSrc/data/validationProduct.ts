@@ -11,7 +11,9 @@ export const ProductSchema = z.object({
     amountInStock: z.string().min(1, { message: "Amount måste anges" })
   .refine(val => !isNaN(Number(val)) && Number(val) >= 0, {
     message: "Amount måste vara ett nummer som är noll eller högre",
+	
   })
+  
 });
 
 export type ProductInput = z.infer<typeof ProductSchema>;
