@@ -1,1 +1,0 @@
-{"version":3,"file":"validationUsers.d.ts","sourceRoot":"","sources":["../../serverSrc/data/validationUsers.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,CAAC,MAAM,KAAK,CAAC;AAIzB,QAAA,MAAM,UAAU;;;;;iBAKd,CAAC;AAEH,QAAA,MAAM,eAAe;;;;;kBAAsB,CAAC;AAC5C,QAAA,MAAM,cAAc;;iBAElB,CAAC;AAKH,OAAO,EAAC,UAAU,EAAE,eAAe,EAAE,cAAc,EAAC,CAAC"}
