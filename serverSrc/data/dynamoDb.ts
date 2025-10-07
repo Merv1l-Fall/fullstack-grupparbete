@@ -1,4 +1,4 @@
-
+// import av db, nycklar och region osv
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 
@@ -21,3 +21,5 @@ const db: DynamoDBDocumentClient = DynamoDBDocumentClient.from(client);
 
 
 export { db, tableName };
+
+

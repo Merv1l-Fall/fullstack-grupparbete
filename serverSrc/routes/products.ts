@@ -55,13 +55,13 @@ router.get('/', async (req: Request, res: Response) => {
 router.post("/", async (req: Request, res: Response) => {
   try {
     // validate input with Zod
-	const pk: string = `PRODUCT#${cryptoId()}`;
+	const randomId: string = cryptoId(8);
     const parsed = ProductSchema.parse(req.body);
 
     const item = {
-      PK: pk,
+      PK: `PRODUCT#${randomId}`,
       SK: "METADATA",
-	  productId: pk,
+	  productId: randomId,
       ...parsed,
     };
 
@@ -103,7 +103,7 @@ router.put('/:id', async (req, res) => {
 
   
     if (Object.keys(updates).length === 0) {
-      return res.status(400).send({ error: 'Nothing to update' });
+      return res.status(400).send({ error: 'Finns inget att uppdatera' });
     }
 
     
@@ -143,13 +143,13 @@ router.put('/:id', async (req, res) => {
     }));
 
     if (!out.Attributes) {
-      return res.status(404).send({ error: 'Not found' });
+      return res.status(404).send({ error: 'Kan inte hittas' });
     }
 
     return res.send(out.Attributes);
   } catch (err) {
     console.error(err);
-    return res.status(500).send({ error: 'Failed to update product' });
+    return res.status(500).send({ error: 'Kunde inte uppdatera produkt' });
   }
 });
 
