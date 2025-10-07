@@ -6,8 +6,14 @@ API:et har tre huvud-delar, "products, users och cart".
 All data sparas i en DynamoDB-databas och skickas i JSON-format.
 Standard-adressen som används är: http://localhost:3350
 
-Börja med att klona repot till din dator och skriv sen npm i för att installera dependencies
-För att start servern skriver du först npm run build server och sen npm run start-server i din konsol
+Börja med att klona repot till din dator och skriv sen "npm i" i konsolen för att installera dependencies
+
+Skapa en .env med denhär layouten
+AWS_ACCESS_KEY_ID = din-nyckel
+AWS_SECRET_ACCESS_KEY = din-hemliga-nyckel
+TABLE_NAME = ditt-tablename
+
+För att start servern skriver du först "npm run build-server" och sen "npm run start-server" i din konsol
 
 1. DynamoDB: 
 I dynamodb har din tabell eller table ett table name. Det är där all data sparas (och hämtas ifrån).
