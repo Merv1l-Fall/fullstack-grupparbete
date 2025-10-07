@@ -183,8 +183,8 @@ router.put(
         new UpdateCommand({
           TableName: tableName,
           Key: { PK: `CART#${cartId}`, SK: `ITEM#${productId}` },
-          UpdateExpression: "SET amount = :a, userId = :u",
-          ExpressionAttributeValues: { ":a": amount, ":u": userId },
+          UpdateExpression: "SET amount = :a, userId = :u, cartId = :c, productId = :p",
+          ExpressionAttributeValues: { ":a": amount, ":u": userId, ":c":cartId, ":p":productId },
           ReturnValues: "ALL_NEW",
         })
       );
@@ -205,7 +205,7 @@ router.put(
 
 // DELETE - Ta bort en cart
 router.delete(
-  "/:cartId",
+  "/:cartId/:userId",
   async (req: Request<{ cartId: string; userId: string }>, res: Response<{ message: string; error?: any }>) => {
     try {
       const params = z.object({
