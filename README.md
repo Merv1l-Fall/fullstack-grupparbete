@@ -9,7 +9,14 @@ Standard-adressen som används är:
 http://localhost:3350
 ```
 
----
+Börja med att klona repot till din dator och skriv sen "npm i" i konsolen för att installera dependencies
+
+Skapa en .env med denhär layouten
+AWS_ACCESS_KEY_ID = din-nyckel
+AWS_SECRET_ACCESS_KEY = din-hemliga-nyckel
+TABLE_NAME = ditt-tablename
+
+För att start servern skriver du först "npm run build-server" och sen "npm run start-server" i din konsol
 
 ## Kom igång
 
